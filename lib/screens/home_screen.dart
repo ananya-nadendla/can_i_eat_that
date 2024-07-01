@@ -19,10 +19,26 @@ class HomeScreen extends StatelessWidget {
     final textRecognizer = TextRecognizer();
     final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
 
+    // Print each block of recognized text to the console
+    for (TextBlock block in recognizedText.blocks) {
+      for (TextLine line in block.lines) {
+        print("Read: '${line.text}'"); //debugging - prints recognized image-to-text from ingredients list
+      }
+    }
+
     AllergyProvider allergyProvider = Provider.of<AllergyProvider>(context, listen: false);
     List<String> allergies = allergyProvider.allergies;
 
-    bool isSafe = allergies.every((allergy) => !recognizedText.text.contains(allergy));
+    // Check if any allergen matches with the recognized text as a whole word
+    bool isSafe = true;
+    for (String allergy in allergies) {
+      RegExp regex = RegExp(r"\b" + RegExp.escape(allergy) + r"\b", caseSensitive: false);
+      if (regex.hasMatch(recognizedText.text)) {
+        print('MATCH FOUND: "$allergy"'); //debugging - prints match between ingredients & allergen
+        isSafe = false;
+        break;
+      }
+    }
 
     textRecognizer.close();
 
@@ -51,13 +67,16 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       appBar: AppBar(
         title: Text('Food Allergy Scanner'),
       ),
+
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            
             Text(
               'Scan a product to check for allergens!',
             ),
@@ -69,11 +88,13 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
+
       floatingActionButton: FloatingActionButton(
         onPressed: () => manageAllergies(context),
         tooltip: 'Manage Allergies',
         child: Icon(Icons.edit),
       ),
+      
     );
   }
 }
