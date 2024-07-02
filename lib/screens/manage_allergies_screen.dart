@@ -11,6 +11,35 @@ class ManageAllergiesScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Manage Allergies'), // Title for the app bar
+        actions: [
+          IconButton(
+            icon: Icon(Icons.delete_sweep), // Icon for the "Clear All" button
+            onPressed: () {
+              // Show a confirmation dialog before clearing all allergies
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text('Clear All Allergies'),
+                  content: Text('Are you sure you want to clear all allergies?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(), // Cancel button
+                      child: Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Provider.of<AllergyProvider>(context, listen: false).clearAllergies(); // Clear all allergies
+                        Navigator.of(context).pop(); // Close the dialog
+                      },
+                      child: Text('Clear All'),
+                    ),
+                  ],
+                ),
+              );
+            },
+            tooltip: 'Clear All Allergies', // Tooltip text
+          ),
+        ],
       ),
       body: Consumer<AllergyProvider>( // Consumer to listen to changes in AllergyProvider
         builder: (context, allergyProvider, child) {

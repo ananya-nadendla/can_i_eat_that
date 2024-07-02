@@ -4,6 +4,12 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
+### [0.1.7] - 2024-07-02
+- BUG FIX
+  1) Prevent empty allergens list before scanning product
+  2) If no text is recognized when scanning, alert user
+  3) Implement "Clear All" button in ManageAllergies
+
 ### [0.1.4] - 2024-07-02
 - MINOR FEATURE
 - 1) If product is unsafe to eat, "See Details" option shows list of offending ingredients on another page (matching_allergen_screen)
@@ -17,11 +23,8 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
     - (Ex) You Tube, you tube, You tube, and YOU TUBE are the same
 
 - TODO:
-    1) Implement "Clear All" button in ManageAllergies
     2) Implement "Treenuts" option (encompasses all nuts)
     3) Make allergens list saveable 
-    4) Prevent empty allergens list before scanning product
-    5) If no text is recognized, show Alert
 
 
 ### [0.0.1] - 2024-07-01

@@ -21,13 +21,6 @@ class HomeScreen extends StatelessWidget {
     final textRecognizer = TextRecognizer();
     final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
 
-    // Print each block of recognized text to the console
-    for (TextBlock block in recognizedText.blocks) {
-      for (TextLine line in block.lines) {
-        print("Read: '${line.text}'"); // Debugging - prints recognized image-to-text from ingredients list
-      }
-    }
-
     // Access the allergy provider and existing allergies list
     AllergyProvider allergyProvider = Provider.of<AllergyProvider>(context, listen: false);
     List<String> allergies = allergyProvider.allergies;
@@ -35,13 +28,18 @@ class HomeScreen extends StatelessWidget {
 
     // Check if any allergen matches with the recognized text as a whole word
     bool isSafe = true;
-    for (String allergy in allergies) {
-      RegExp regex = RegExp(r"\b" + RegExp.escape(allergy) + r"\b", caseSensitive: false);
-      if (regex.hasMatch(recognizedText.text)) {
-        print('MATCH FOUND: "$allergy"'); // Debugging - prints match between ingredients & allergen
-        isSafe = false;
-        matchingAllergens.add(allergy); // Add matching allergen to the list
+    if (recognizedText.text.isNotEmpty) {
+      for (String allergy in allergies) {
+        RegExp regex = RegExp(r"\b" + RegExp.escape(allergy) + r"\b", caseSensitive: false);
+        if (regex.hasMatch(recognizedText.text)) {
+          print('MATCH FOUND: "$allergy"'); // Debugging - prints match between ingredients & allergen
+          isSafe = false;
+          matchingAllergens.add(allergy); // Add matching allergen to the list
+        }
       }
+    } else {
+      // No text was recognized
+      isSafe = false;
     }
 
     textRecognizer.close(); // Close the text recognizer
@@ -50,12 +48,18 @@ class HomeScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Scan Result'), // Title of the dialog
+        title: Center(child: Text('Scan Result')), // Centered title of the dialog
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(isSafe ? 'The product is safe to eat!' : 'The product contains allergens!'), // Show result message
-            if (!isSafe)
+            Center(
+              child: Text(
+                recognizedText.text.isNotEmpty
+                    ? (isSafe ? 'The product is safe to eat!' : 'The product contains allergens!')
+                    : 'No text was recognized!',
+              ),
+            ), // Centered result message
+            if (!isSafe && recognizedText.text.isNotEmpty)
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop(); // Close the current dialog
@@ -94,20 +98,32 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('Food Allergy Scanner'), // Title of the app bar
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'Scan a product to check for allergens!', // Instruction text
+      body: Consumer<AllergyProvider>(
+        builder: (context, allergyProvider, child) {
+          bool hasAllergies = allergyProvider.allergies.isNotEmpty;
+
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  'Scan a product to check for allergens!', // Instruction text
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: hasAllergies
+                      ? () => scanProduct(context)
+                      : () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Please add at least one allergen before scanning.')),
+                          );
+                        },
+                  child: Text('Scan Product'), // Button text
+                ),
+              ],
             ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => scanProduct(context), // Button to initiate product scanning
-              child: Text('Scan Product'), // Button text
-            ),
-          ],
-        ),
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => manageAllergies(context), // Floating action button to manage allergies

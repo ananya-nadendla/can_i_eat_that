@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
-class AllergyProvider with ChangeNotifier {
+class AllergyProvider extends ChangeNotifier {
   List<String> _allergies = [];
 
   List<String> get allergies => _allergies;
@@ -12,6 +12,11 @@ class AllergyProvider with ChangeNotifier {
 
   void removeAllergy(String allergy) {
     _allergies.remove(allergy);
+    notifyListeners();
+  }
+
+  void clearAllergies() {
+    _allergies.clear();
     notifyListeners();
   }
 }
