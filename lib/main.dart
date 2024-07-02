@@ -14,14 +14,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AllergyProvider()),
+        ChangeNotifierProvider(create: (_) => AllergyProvider()), // Provider for managing allergies
       ],
       child: MaterialApp(
-        title: 'Food Allergy Scanner',
+        title: 'Food Allergy Scanner', // App title
         theme: ThemeData(
-          primarySwatch: Colors.blue,
+          primarySwatch: Colors.blue, // Theme color
         ),
-        home: HomeScreen(),
+        home: HomeScreen(), // Initial screen of the app
       ),
     );
   }
