@@ -20,6 +20,8 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
     1) Implement "Clear All" button in ManageAllergies
     2) Implement "Treenuts" option (encompasses all nuts)
     3) Make allergens list saveable 
+    4) Prevent empty allergens list before scanning product
+    5) If no text is recognized, show Alert
 
 
 ### [0.0.1] - 2024-07-01
