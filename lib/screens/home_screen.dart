@@ -21,6 +21,17 @@ class HomeScreen extends StatelessWidget {
     final textRecognizer = TextRecognizer();
     final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
 
+    // Print out all the ingredients that were scanned
+    print('Scanned Ingredients: ${recognizedText.text}'); // Debugging - prints all the recognized text
+
+    // Print out each individual ingredient 
+    /*List<String> ingredients = recognizedText.text.split(RegExp(r'\s+')); // Split text by whitespace
+    for (String ingredient in ingredients) {
+      print('Ingredient: $ingredient'); // Debugging - prints each ingredient separately
+    }*/
+    
+
+
     // Access the allergy provider and existing allergies list
     AllergyProvider allergyProvider = Provider.of<AllergyProvider>(context, listen: false);
     List<String> allergies = allergyProvider.allergies;

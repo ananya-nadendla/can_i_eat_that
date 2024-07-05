@@ -33,6 +33,7 @@ dependencies:
   google_mlkit_text_recognition: ^0.13.0
   image_picker: ^1.1.2
   provider: ^6.0.0
+  shared_preferences: ^2.0.15
 
   
 

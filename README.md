@@ -4,11 +4,20 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
+### [0.2.0] - 2024-07-05
+- MINOR FEATURE
+    1) Made allergens list saveable using SharedPreferences
+ 
+- TODO:
+    2) Implement "Treenuts" option (encompasses all nuts)
+
+
 ### [0.1.7] - 2024-07-02
 - BUG FIX
   1) Prevent empty allergens list before scanning product
   2) If no text is recognized when scanning, alert user
   3) Implement "Clear All" button in ManageAllergies
+
 
 ### [0.1.4] - 2024-07-02
 - MINOR FEATURE
@@ -21,10 +30,6 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 - 4) Duplicate allergen entries not allowed in ManageAllergies.
     - (Ex) YouTube, Youtube, youtube, YOUTUBE, are the same
     - (Ex) You Tube, you tube, You tube, and YOU TUBE are the same
-
-- TODO:
-    2) Implement "Treenuts" option (encompasses all nuts)
-    3) Make allergens list saveable 
 
 
 ### [0.0.1] - 2024-07-01

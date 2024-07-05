@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:food_allergy_scanner/providers/allergy_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class ManageAllergiesScreen extends StatelessWidget {
   final TextEditingController _controller = TextEditingController();
