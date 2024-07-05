@@ -4,12 +4,22 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
+### [0.3.0] - 2024-07-05
+- MINOR FEATURE
+    1) Included "Treenuts" option encompassing all nuts
+ 
+- BUG FIX
+    1) Made "treenuts" and "tree nuts" both recognizable as Tree Nuts
+
+- TODO:
+    1) Solve issue of plurals (i.e user enters "Almonds" but ingredients say "Almond")
+    2) Format user's capitalization errors (i.e HOney shows up as Honey)
+    2) Use same Tree Nut concept for one other one-word-encompassing allergen descriptors (crustacean, dairy, etc)
+
+
 ### [0.2.0] - 2024-07-05
 - MINOR FEATURE
     1) Made allergens list saveable using SharedPreferences
- 
-- TODO:
-    2) Implement "Treenuts" option (encompasses all nuts)
 
 
 ### [0.1.7] - 2024-07-02
