@@ -10,6 +10,7 @@ class ManageAllergiesScreen extends StatefulWidget {
 class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
   final TextEditingController _controller = TextEditingController();
   static const int maxAllergies = 20;
+  String? _selectedGroupAllergen;
 
   @override
   void initState() {
@@ -69,7 +70,8 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                   itemCount: allergyProvider.allergies.length, // Number of items in the list
                   itemBuilder: (context, index) {
                     String allergy = allergyProvider.allergies[index]; // Get each allergy from the list
-                    if (allergy.toLowerCase() == 'treenuts' || allergy.toLowerCase() == 'tree nuts') {
+                    if (allergy == 'Tree Nuts') {
+                      // Display "Tree Nuts" with its corresponding nuts
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -100,6 +102,7 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                       // Skip rendering individual tree nuts as they are handled above
                       return Container();
                     } else {
+                      // Display other allergens
                       return ListTile(
                         title: Text(allergy), // Display the allergy name
                         trailing: IconButton(
@@ -113,76 +116,105 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0), // Padding around the input row
-                child: Row(
+                child: Column(
                   children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _controller, // Controller for text input
-                        decoration: InputDecoration(
-                          labelText: 'Add Allergy', // Input field label
-                          suffixIcon: _controller.text.trim().toLowerCase() == 'treenuts'
-                              || _controller.text.trim().toLowerCase() == 'tree nuts'
-                              ? IconButton(
-                                  icon: Icon(Icons.info), // Info icon button
-                                  onPressed: () {
-                                    // Show dialog with information about tree nuts
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        title: Text('Treenuts Information'),
-                                        content: Text(
-                                          'Treenuts include: ${allergyProvider.treeNuts.join(', ')}'
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () => Navigator.of(context).pop(),
-                                            child: Text('OK'),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                )
-                              : null,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _controller, // Controller for text input
+                            decoration: InputDecoration(
+                              labelText: 'Add Allergy', // Input field label
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.add), // Add icon button
-                      onPressed: () {
-                        String newAllergy = _controller.text.trim().toLowerCase(); // Normalize input to lowercase
-                        if (newAllergy.isNotEmpty) { // Check if input is not empty
-                          if (allergyProvider.allergies.length < maxAllergies) { // Check if not exceeding max limit
-                            bool isDuplicate = allergyProvider.allergies
-                                .map((allergy) => allergy.toLowerCase()) // Compare lowercase to check for duplicates
-                                .contains(newAllergy);
-                            // Check for duplicates including "Tree Nuts"
-                            if (isDuplicate || (newAllergy == 'treenuts' || newAllergy == 'tree nuts') && allergyProvider.allergies.map((allergy) => allergy.toLowerCase()).contains('tree nuts')) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('This allergen is already in the list')), // Show duplicate message
-                              );
+                        IconButton(
+                          icon: Icon(Icons.add), // Add icon button
+                          onPressed: () {
+                            String newAllergy = _controller.text.trim().toLowerCase(); // Normalize input to lowercase
+                            if (newAllergy.isNotEmpty) { // Check if input is not empty
+                              if (allergyProvider.allergies.length < maxAllergies) { // Check if not exceeding max limit
+                                bool isDuplicate = allergyProvider.allergies
+                                    .map((allergy) => allergy.toLowerCase()) // Compare lowercase to check for duplicates
+                                    .contains(newAllergy);
+                                if (isDuplicate) { // Check for duplicates
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('This allergen is already in the list')), // Show duplicate message
+                                  );
+                                } else {
+                                  allergyProvider.addAllergy(_controller.text.trim()); // Add the allergy
+                                  _controller.clear(); // Clear the input field
+                                }
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('You can add a maximum of 20 allergies')), // Show max allergies message
+                                );
+                              }
                             } else {
-                              if (newAllergy == 'treenuts' || newAllergy == 'tree nuts') {
-                                allergyProvider.addAllergy('Tree Nuts'); // Add "Tree Nuts"
-                                allergyProvider.treeNuts.forEach((treeNut) {
-                                  allergyProvider.addAllergy(treeNut); // Add corresponding nuts
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Please enter a valid allergen')), // Show empty input message
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: DropdownButton<String>(
+                            hint: Text('Select Group Allergen'), // Dropdown hint text
+                            value: _selectedGroupAllergen, // Selected group allergen value
+                            onChanged: (String? newValue) { // Dropdown value change handler
+                              setState(() {
+                                _selectedGroupAllergen = newValue; // Update selected group allergen
+                              });
+                            },
+                            items: <String>['Tree Nuts'] // Dropdown items
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value), // Display dropdown item text
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.add), // Add icon button
+                          onPressed: () {
+                            if (_selectedGroupAllergen != null) { // Check if a group allergen is selected
+                              if (allergyProvider.allergies.length < maxAllergies) { // Check if not exceeding max limit
+                                bool isDuplicate = allergyProvider.allergies
+                                    .map((allergy) => allergy.toLowerCase()) // Compare lowercase to check for duplicates
+                                    .contains('tree nuts');
+                                if (!isDuplicate) { // Check for duplicates
+                                  allergyProvider.addAllergy('Tree Nuts'); // Add "Tree Nuts"
+                                  allergyProvider.treeNuts.forEach((treeNut) {
+                                    if (!allergyProvider.allergies.contains(treeNut)) {
+                                      allergyProvider.addAllergy(treeNut); // Add corresponding nuts
+                                    }
+                                  });
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Tree Nuts are already in the list')), // Show duplicate message
+                                  );
+                                }
+                                setState(() {
+                                  _selectedGroupAllergen = null; // Reset selected group allergen
                                 });
                               } else {
-                                allergyProvider.addAllergy(_controller.text.trim()); // Add the allergy
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('You can add a maximum of 20 allergies')), // Show max allergies message
+                                );
                               }
-                              _controller.clear(); // Clear the input field
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Please select a group allergen')), // Show empty group allergen message
+                              );
                             }
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('You can add a maximum of 20 allergies')), // Show max allergies message
-                            );
-                          }
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Please enter a valid allergen')), // Show empty input message
-                          );
-                        }
-                      },
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
