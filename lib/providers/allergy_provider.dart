@@ -4,26 +4,70 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AllergyProvider extends ChangeNotifier {
   List<String> _allergies = [];
   final List<String> _treeNuts = [
-    'Almonds',
-    'Brazil Nuts',
-    'Cashews',
-    'Chestnuts',
-    'Hazelnuts',
-    'Macadamia Nuts',
-    'Pecans',
-    'Pine Nuts',
-    'Pistachios',
-    'Walnuts'
+    'Almond',
+    'Brazil Nut',
+    'Cashew',
+    'Chestnut',
+    'Hazelnut',
+    'Macadamia Nut',
+    'Pecan',
+    'Pine Nut',
+    'Pistachio',
+    'Walnut'
   ];
+  final List<String> _crustaceanShellfish = [
+    'Crab',
+    'Crayfish',
+    'Lobster',
+    'Shrimp',
+    'Prawn'
+  ];
+  final List<String> _fish = [
+    'Anchovy', //issue - how to deal with "Anchovies", where plural is different?
+    'Bass',
+    'Catfish',
+    'Cod',
+    'Flounder',
+    'Grouper',
+    'Haddock',
+    'Hake',
+    'Halibut',
+    'Herring',
+    'Mahi mahi',
+    'Perch',
+    'Pike',
+    'Pollock',
+    'Salmon',
+    'Scrod',
+    'Sole',
+    'Snapper',
+    'Swordfish',
+    'Tilapia',
+    'Trout',
+    'Tuna'
+  ];
+
+  final List<String> _legumes = [
+  'Peanut',
+  'Chickpea',
+  'Lentil',
+  'Lupin',
+  'Pea',
+  'Soybeans'
+];
+
 
   List<String> get allergies => _allergies;
   List<String> get treeNuts => _treeNuts;
+  List<String> get crustaceanShellfish => _crustaceanShellfish;
+  List<String> get fish => _fish;
+  List<String> get legumes => _legumes;
 
   AllergyProvider() {
     _loadAllergies();
   }
 
- void addAllergy(String allergy) {
+  void addAllergy(String allergy) {
     if (!_allergies.contains(allergy)) {
       _allergies.add(allergy);
       _saveAllergies();
@@ -47,6 +91,30 @@ class AllergyProvider extends ChangeNotifier {
     }
   }
 
+  void removeShellfish(String shellfish) {
+    if (_allergies.contains(shellfish)) {
+      _allergies.remove(shellfish);
+      _saveAllergies();
+      notifyListeners();
+    }
+  }
+
+  void removeFish(String fish) {
+    if (_allergies.contains(fish)) {
+      _allergies.remove(fish);
+      _saveAllergies();
+      notifyListeners();
+    }
+  }
+
+  void removeLegumes(String legume) {
+    if (_allergies.contains(legume)) {
+      _allergies.remove(legume);
+      _saveAllergies();
+      notifyListeners();
+    }
+  }
+
   void clearAllergies() {
     _allergies.clear();
     _saveAllergies();
@@ -63,6 +131,41 @@ class AllergyProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  void removeCrustaceanShellfishAndCorrespondingShellfish() {
+    if (_allergies.contains('Crustacean Shellfish')) {
+      _allergies.remove('Crustacean Shellfish');
+      for (String shellfish in crustaceanShellfish) {
+        _allergies.remove(shellfish);
+      }
+      _saveAllergies();
+      notifyListeners();
+    }
+  }
+
+  void removeFishAndCorrespondingFish() {
+    if (_allergies.contains('Fish')) {
+      _allergies.remove('Fish');
+      for (String fish in this.fish) {
+        _allergies.remove(fish);
+      }
+      _saveAllergies();
+      notifyListeners();
+    }
+  }
+
+  void removeLegumesAndCorrespondingLegumes() {
+  if (_allergies.contains('Legumes')) {
+    _allergies.remove('Legumes');
+    for (String legume in legumes) {
+      _allergies.remove(legume);
+    }
+    _saveAllergies();
+    notifyListeners();
+  }
+}
+
+
   Future<void> _saveAllergies() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('allergies', _allergies);

@@ -98,8 +98,96 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                           }).toList(),
                         ],
                       );
-                    } else if (allergyProvider.treeNuts.contains(allergy)) {
-                      // Skip rendering individual tree nuts as they are handled above
+                    } else if (allergy == 'Crustacean Shellfish') {
+                      // Display "Crustacean Shellfish" with its corresponding shellfish
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ListTile(
+                            title: Text('Crustacean Shellfish'), // Display "Crustacean Shellfish"
+                            trailing: IconButton(
+                              icon: Icon(Icons.delete), // Delete icon button
+                              onPressed: () => allergyProvider.removeCrustaceanShellfishAndCorrespondingShellfish(), // Remove "Crustacean Shellfish" and corresponding shellfish
+                            ),
+                          ),
+                          ...allergyProvider.crustaceanShellfish.map((shellfish) {
+                            return allergyProvider.allergies.contains(shellfish)
+                                ? Padding(
+                                    padding: const EdgeInsets.only(left: 16.0),
+                                    child: ListTile(
+                                      title: Text(shellfish), // Display each shellfish
+                                      trailing: IconButton(
+                                        icon: Icon(Icons.delete), // Delete icon button
+                                        onPressed: () => allergyProvider.removeShellfish(shellfish), // Remove specific shellfish
+                                      ),
+                                    ),
+                                  )
+                                : Container();
+                          }).toList(),
+                        ],
+                      );
+                    } else if (allergy == 'Fish') {
+                      // Display "Fish" with its corresponding fish
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ListTile(
+                            title: Text('Fish'), // Display "Fish"
+                            trailing: IconButton(
+                              icon: Icon(Icons.delete), // Delete icon button
+                              onPressed: () => allergyProvider.removeFishAndCorrespondingFish(), // Remove "Fish" and corresponding fish
+                            ),
+                          ),
+                          ...allergyProvider.fish.map((fish) {
+                            return allergyProvider.allergies.contains(fish)
+                                ? Padding(
+                                    padding: const EdgeInsets.only(left: 16.0),
+                                    child: ListTile(
+                                      title: Text(fish), // Display each fish
+                                      trailing: IconButton(
+                                        icon: Icon(Icons.delete), // Delete icon button
+                                        onPressed: () => allergyProvider.removeFish(fish), // Remove specific fish
+                                      ),
+                                    ),
+                                  )
+                                : Container();
+                          }).toList(),
+                        ],
+                      );
+                    } 
+                    else if (allergy == 'Legumes') { // Display "Legumes"
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ListTile(
+                            title: Text('Legumes'),
+                            trailing: IconButton(
+                              icon: Icon(Icons.delete), // Delete icon button
+                              onPressed: () => allergyProvider.removeLegumesAndCorrespondingLegumes(),  // Remove "Legumes and corresponding legumes
+                            ),
+                          ),
+                          ...allergyProvider.legumes.map((legume) {
+                            return allergyProvider.allergies.contains(legume)
+                                ? Padding(
+                                    padding: const EdgeInsets.only(left: 16.0),
+                                    child: ListTile(
+                                      title: Text(legume), //Display each legume
+                                      trailing: IconButton(
+                                        icon: Icon(Icons.delete), //delete icon button
+                                        onPressed: () => allergyProvider.removeAllergy(legume), //remove specific fish
+                                      ),
+                                    ),
+                                  )
+                                : Container();
+                          }).toList(),
+                        ],
+                      );
+                    }
+                    else if (allergyProvider.treeNuts.contains(allergy) ||
+                        allergyProvider.crustaceanShellfish.contains(allergy) ||
+                        allergyProvider.fish.contains(allergy) || 
+                        allergyProvider.legumes.contains(allergy)) {
+                      // Skip rendering individual tree nuts, shellfish, or fish as they are handled above
                       return Container();
                     } else {
                       // Display other allergens
@@ -124,7 +212,7 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                           child: TextField(
                             controller: _controller, // Controller for text input
                             decoration: InputDecoration(
-                              labelText: 'Add Allergy', // Input field label
+                              labelText: 'Input Single Allergen', // Input field label
                             ),
                           ),
                         ),
@@ -170,7 +258,7 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                                 _selectedGroupAllergen = newValue; // Update selected group allergen
                               });
                             },
-                            items: <String>['Tree Nuts'] // Dropdown items
+                            items: <String>['Tree Nuts', 'Crustacean Shellfish', 'Fish', 'Legumes'] // Dropdown items
                                 .map<DropdownMenuItem<String>>((String value) {
                               return DropdownMenuItem<String>(
                                 value: value,
@@ -186,17 +274,38 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                               if (allergyProvider.allergies.length < maxAllergies) { // Check if not exceeding max limit
                                 bool isDuplicate = allergyProvider.allergies
                                     .map((allergy) => allergy.toLowerCase()) // Compare lowercase to check for duplicates
-                                    .contains('tree nuts');
+                                    .contains(_selectedGroupAllergen!.toLowerCase());
                                 if (!isDuplicate) { // Check for duplicates
-                                  allergyProvider.addAllergy('Tree Nuts'); // Add "Tree Nuts"
-                                  allergyProvider.treeNuts.forEach((treeNut) {
-                                    if (!allergyProvider.allergies.contains(treeNut)) {
-                                      allergyProvider.addAllergy(treeNut); // Add corresponding nuts
-                                    }
-                                  });
+                                  allergyProvider.addAllergy(_selectedGroupAllergen!); // Add selected group allergen
+                                  if (_selectedGroupAllergen == 'Tree Nuts') {
+                                    allergyProvider.treeNuts.forEach((treeNut) {
+                                      if (!allergyProvider.allergies.contains(treeNut)) {
+                                        allergyProvider.addAllergy(treeNut); // Add corresponding tree nuts
+                                      }
+                                    });
+                                  } else if (_selectedGroupAllergen == 'Crustacean Shellfish') {
+                                    allergyProvider.crustaceanShellfish.forEach((shellfish) {
+                                      if (!allergyProvider.allergies.contains(shellfish)) {
+                                        allergyProvider.addAllergy(shellfish); // Add corresponding shellfish
+                                      }
+                                    });
+                                  } else if (_selectedGroupAllergen == 'Fish') {
+                                    allergyProvider.fish.forEach((fish) {
+                                      if (!allergyProvider.allergies.contains(fish)) {
+                                        allergyProvider.addAllergy(fish); // Add corresponding fish
+                                      }
+                                    });
+                                  }
+                                  else if (_selectedGroupAllergen == 'Legumes') {
+                                    allergyProvider.legumes.forEach((legume) {
+                                      if (!allergyProvider.allergies.contains(legume)) {
+                                        allergyProvider.addAllergy(legume); // Add corresponding legumes
+                                      }
+                                    });
+                                  }
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Tree Nuts are already in the list')), // Show duplicate message
+                                    SnackBar(content: Text('This group allergen is already in the list')), // Show duplicate message
                                   );
                                 }
                                 setState(() {
