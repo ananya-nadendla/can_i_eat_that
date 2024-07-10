@@ -9,7 +9,7 @@ class ManageAllergiesScreen extends StatefulWidget {
 
 class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
   final TextEditingController _controller = TextEditingController();
-  static const int maxAllergies = 20;
+  static const int maxAllergies = 30;
   String? _selectedGroupAllergen;
 
   @override
@@ -154,16 +154,16 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                           }).toList(),
                         ],
                       );
-                    } 
-                    else if (allergy == 'Legumes') { // Display "Legumes"
+                    } else if (allergy == 'Legumes') {
+                      // Display "Legumes" with its corresponding legumes
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           ListTile(
-                            title: Text('Legumes'),
+                            title: Text('Legumes'), // Display "Legumes"
                             trailing: IconButton(
                               icon: Icon(Icons.delete), // Delete icon button
-                              onPressed: () => allergyProvider.removeLegumesAndCorrespondingLegumes(),  // Remove "Legumes and corresponding legumes
+                              onPressed: () => allergyProvider.removeLegumesAndCorrespondingLegumes(), // Remove "Legumes" and corresponding legumes
                             ),
                           ),
                           ...allergyProvider.legumes.map((legume) {
@@ -171,10 +171,10 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                                 ? Padding(
                                     padding: const EdgeInsets.only(left: 16.0),
                                     child: ListTile(
-                                      title: Text(legume), //Display each legume
+                                      title: Text(legume), // Display each legume
                                       trailing: IconButton(
-                                        icon: Icon(Icons.delete), //delete icon button
-                                        onPressed: () => allergyProvider.removeAllergy(legume), //remove specific fish
+                                        icon: Icon(Icons.delete), // Delete icon button
+                                        onPressed: () => allergyProvider.removeAllergy(legume), // Remove specific legume
                                       ),
                                     ),
                                   )
@@ -182,15 +182,14 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                           }).toList(),
                         ],
                       );
-                    }
-                    else if (allergyProvider.treeNuts.contains(allergy) ||
-                        allergyProvider.crustaceanShellfish.contains(allergy) ||
-                        allergyProvider.fish.contains(allergy) || 
-                        allergyProvider.legumes.contains(allergy)) {
-                      // Skip rendering individual tree nuts, shellfish, or fish as they are handled above
+                    } else if (allergyProvider.treeNuts.contains(allergy) ||
+                               allergyProvider.crustaceanShellfish.contains(allergy) ||
+                               allergyProvider.fish.contains(allergy) ||
+                               allergyProvider.legumes.contains(allergy)) {
+                      // Skip rendering individual items handled above
                       return Container();
                     } else {
-                      // Display other allergens
+                      // Display other individual allergens
                       return ListTile(
                         title: Text(allergy), // Display the allergy name
                         trailing: IconButton(
@@ -230,12 +229,12 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                                     SnackBar(content: Text('This allergen is already in the list')), // Show duplicate message
                                   );
                                 } else {
-                                  allergyProvider.addAllergy(_controller.text.trim()); // Add the allergy
+                                  allergyProvider.addAllergy(newAllergy); // Add the new allergen
                                   _controller.clear(); // Clear the input field
                                 }
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('You can add a maximum of 20 allergies')), // Show max allergies message
+                                  SnackBar(content: Text('You can add a maximum of 30 allergies')), // Show max allergies message
                                 );
                               }
                             } else {
@@ -295,8 +294,7 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                                         allergyProvider.addAllergy(fish); // Add corresponding fish
                                       }
                                     });
-                                  }
-                                  else if (_selectedGroupAllergen == 'Legumes') {
+                                  } else if (_selectedGroupAllergen == 'Legumes') {
                                     allergyProvider.legumes.forEach((legume) {
                                       if (!allergyProvider.allergies.contains(legume)) {
                                         allergyProvider.addAllergy(legume); // Add corresponding legumes
@@ -313,7 +311,7 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                                 });
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('You can add a maximum of 20 allergies')), // Show max allergies message
+                                  SnackBar(content: Text('You can add a maximum of 30 allergies')), // Show max allergies message
                                 );
                               }
                             } else {
