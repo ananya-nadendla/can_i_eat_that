@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:pluralize/pluralize.dart';
+
+
 import 'package:food_allergy_scanner/providers/allergy_provider.dart';
 import 'package:food_allergy_scanner/screens/manage_allergies_screen.dart';
 import 'package:food_allergy_scanner/screens/matching_allergens_screen.dart';
+
 
 class HomeScreen extends StatelessWidget {
   // Function to initiate product scanning
@@ -21,28 +25,25 @@ class HomeScreen extends StatelessWidget {
     final textRecognizer = TextRecognizer();
     final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
 
-    // Print out all the ingredients that were scanned
-    print('Scanned Ingredients: ${recognizedText.text}'); // Debugging - prints all the recognized text
-
-    // Print out each individual ingredient 
-    /*List<String> ingredients = recognizedText.text.split(RegExp(r'\s+')); // Split text by whitespace
-    for (String ingredient in ingredients) {
-      print('Ingredient: $ingredient'); // Debugging - prints each ingredient separately
-    }*/
-    
-
-
     // Access the allergy provider and existing allergies list
     AllergyProvider allergyProvider = Provider.of<AllergyProvider>(context, listen: false);
     List<String> allergies = allergyProvider.allergies;
     List<String> matchingAllergens = [];
 
-    // Check if any allergen matches with the recognized text as a whole word
+   // Check if any allergen matches with the recognized text
     bool isSafe = true;
     if (recognizedText.text.isNotEmpty) {
       for (String allergy in allergies) {
-        RegExp regex = RegExp(r"\b" + RegExp.escape(allergy) + r"\b", caseSensitive: false);
-        if (regex.hasMatch(recognizedText.text)) {
+        // Check both singular and plural forms
+        String singular = Pluralize().singular(allergy);
+        String plural = Pluralize().plural(allergy);
+
+        RegExp regexSingular = RegExp(r"\b" + RegExp.escape(singular) + r"\b", caseSensitive: false);
+        RegExp regexPlural = RegExp(r"\b" + RegExp.escape(plural) + r"\b", caseSensitive: false);
+
+        print('Checking: Singular: $singular, Plural: $plural'); // Debugging - print singular and plural forms
+
+        if (regexSingular.hasMatch(recognizedText.text) || regexPlural.hasMatch(recognizedText.text)) {
           print('MATCH FOUND: "$allergy"'); // Debugging - prints match between ingredients & allergen
           isSafe = false;
           matchingAllergens.add(allergy); // Add matching allergen to the list
@@ -52,6 +53,7 @@ class HomeScreen extends StatelessWidget {
       // No text was recognized
       isSafe = false;
     }
+
 
     textRecognizer.close(); // Close the text recognizer
 
