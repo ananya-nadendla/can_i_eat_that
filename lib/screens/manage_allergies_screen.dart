@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:pluralize/pluralize.dart';
 import 'package:food_allergy_scanner/providers/allergy_provider.dart';
 
 class ManageAllergiesScreen extends StatefulWidget {
@@ -70,13 +71,15 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                   itemCount: allergyProvider.allergies.length, // Number of items in the list
                   itemBuilder: (context, index) {
                     String allergy = allergyProvider.allergies[index]; // Get each allergy from the list
+                    String displayAllergy = _capitalizeFirstLetter(allergy); // Capitalize first letter for display
+
                     if (allergy == 'Tree Nuts') {
                       // Display "Tree Nuts" with its corresponding nuts
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           ListTile(
-                            title: Text('Tree Nuts'), // Display "Tree Nuts"
+                            title: Text(displayAllergy), // Display capitalized allergy name
                             trailing: IconButton(
                               icon: Icon(Icons.delete), // Delete icon button
                               onPressed: () => allergyProvider.removeTreeNutsAndCorrespondingNuts(), // Remove "Tree Nuts" and corresponding nuts
@@ -87,7 +90,7 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                                 ? Padding(
                                     padding: const EdgeInsets.only(left: 16.0),
                                     child: ListTile(
-                                      title: Text(treeNut), // Display each tree nut
+                                      title: Text(_capitalizeFirstLetter(treeNut)), // Display capitalized tree nut
                                       trailing: IconButton(
                                         icon: Icon(Icons.delete), // Delete icon button
                                         onPressed: () => allergyProvider.removeTreeNut(treeNut), // Remove specific tree nut
@@ -104,7 +107,7 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           ListTile(
-                            title: Text('Crustacean Shellfish'), // Display "Crustacean Shellfish"
+                            title: Text(displayAllergy), // Display capitalized allergy name
                             trailing: IconButton(
                               icon: Icon(Icons.delete), // Delete icon button
                               onPressed: () => allergyProvider.removeCrustaceanShellfishAndCorrespondingShellfish(), // Remove "Crustacean Shellfish" and corresponding shellfish
@@ -115,7 +118,7 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                                 ? Padding(
                                     padding: const EdgeInsets.only(left: 16.0),
                                     child: ListTile(
-                                      title: Text(shellfish), // Display each shellfish
+                                      title: Text(_capitalizeFirstLetter(shellfish)), // Display capitalized shellfish
                                       trailing: IconButton(
                                         icon: Icon(Icons.delete), // Delete icon button
                                         onPressed: () => allergyProvider.removeShellfish(shellfish), // Remove specific shellfish
@@ -132,7 +135,7 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           ListTile(
-                            title: Text('Fish'), // Display "Fish"
+                            title: Text(displayAllergy), // Display capitalized allergy name
                             trailing: IconButton(
                               icon: Icon(Icons.delete), // Delete icon button
                               onPressed: () => allergyProvider.removeFishAndCorrespondingFish(), // Remove "Fish" and corresponding fish
@@ -143,7 +146,7 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                                 ? Padding(
                                     padding: const EdgeInsets.only(left: 16.0),
                                     child: ListTile(
-                                      title: Text(fish), // Display each fish
+                                      title: Text(_capitalizeFirstLetter(fish)), // Display capitalized fish
                                       trailing: IconButton(
                                         icon: Icon(Icons.delete), // Delete icon button
                                         onPressed: () => allergyProvider.removeFish(fish), // Remove specific fish
@@ -160,7 +163,7 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           ListTile(
-                            title: Text('Legumes'), // Display "Legumes"
+                            title: Text(displayAllergy), // Display capitalized allergy name
                             trailing: IconButton(
                               icon: Icon(Icons.delete), // Delete icon button
                               onPressed: () => allergyProvider.removeLegumesAndCorrespondingLegumes(), // Remove "Legumes" and corresponding legumes
@@ -171,7 +174,7 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                                 ? Padding(
                                     padding: const EdgeInsets.only(left: 16.0),
                                     child: ListTile(
-                                      title: Text(legume), // Display each legume
+                                      title: Text(_capitalizeFirstLetter(legume)), // Display capitalized legume
                                       trailing: IconButton(
                                         icon: Icon(Icons.delete), // Delete icon button
                                         onPressed: () => allergyProvider.removeAllergy(legume), // Remove specific legume
@@ -191,7 +194,7 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                     } else {
                       // Display other individual allergens
                       return ListTile(
-                        title: Text(allergy), // Display the allergy name
+                        title: Text(displayAllergy), // Display capitalized allergy name
                         trailing: IconButton(
                           icon: Icon(Icons.delete), // Delete icon button
                           onPressed: () => allergyProvider.removeAllergy(allergy), // Remove allergy when pressed
@@ -222,15 +225,15 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                             if (newAllergy.isNotEmpty) { // Check if input is not empty
                               if (allergyProvider.allergies.length < maxAllergies) { // Check if not exceeding max limit
                                 bool isDuplicate = allergyProvider.allergies
-                                    .map((allergy) => allergy.toLowerCase()) // Compare lowercase to check for duplicates
-                                    .contains(newAllergy);
-                                if (isDuplicate) { // Check for duplicates
+                                    .map((allergy) => Pluralize().singular(allergy).toLowerCase()) // Compare lowercase singular form to check for duplicates
+                                    .contains(Pluralize().singular(newAllergy));
+                                if (!isDuplicate) {
+                                  allergyProvider.addAllergy(newAllergy); // Add the new allergen
+                                  _controller.clear(); // Clear the input field
+                                } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(content: Text('This allergen is already in the list')), // Show duplicate message
                                   );
-                                } else {
-                                  allergyProvider.addAllergy(newAllergy); // Add the new allergen
-                                  _controller.clear(); // Clear the input field
                                 }
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -252,16 +255,21 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                           child: DropdownButton<String>(
                             hint: Text('Select Group Allergen'), // Dropdown hint text
                             value: _selectedGroupAllergen, // Selected group allergen value
-                            onChanged: (String? newValue) { // Dropdown value change handler
+                            onChanged: (String? value) {
                               setState(() {
-                                _selectedGroupAllergen = newValue; // Update selected group allergen
+                                _selectedGroupAllergen = value; // Set selected group allergen
                               });
                             },
-                            items: <String>['Tree Nuts', 'Crustacean Shellfish', 'Fish', 'Legumes'] // Dropdown items
+                            items: <String>[
+                              'Tree Nuts',
+                              'Crustacean Shellfish',
+                              'Fish',
+                              'Legumes',
+                            ]
                                 .map<DropdownMenuItem<String>>((String value) {
                               return DropdownMenuItem<String>(
                                 value: value,
-                                child: Text(value), // Display dropdown item text
+                                child: Text(value), // Display dropdown item
                               );
                             }).toList(),
                           ),
@@ -270,66 +278,64 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                           icon: Icon(Icons.add), // Add icon button
                           onPressed: () {
                             if (_selectedGroupAllergen != null) { // Check if a group allergen is selected
-                              // Calculate the total allergies if we add the selected group
-                              int totalAllergies = allergyProvider.allergies.length;
+                              int totalAllergies = allergyProvider.allergies.length; // Total current allergies count
                               if (_selectedGroupAllergen == 'Tree Nuts') {
-                                totalAllergies += allergyProvider.treeNuts.length;
+                                totalAllergies += allergyProvider.treeNuts.length; // Add tree nuts count
                               } else if (_selectedGroupAllergen == 'Crustacean Shellfish') {
-                                totalAllergies += allergyProvider.crustaceanShellfish.length;
+                                totalAllergies += allergyProvider.crustaceanShellfish.length; // Add crustacean shellfish count
                               } else if (_selectedGroupAllergen == 'Fish') {
-                                totalAllergies += allergyProvider.fish.length;
+                                totalAllergies += allergyProvider.fish.length; // Add fish count
                               } else if (_selectedGroupAllergen == 'Legumes') {
-                                totalAllergies += allergyProvider.legumes.length;
+                                totalAllergies += allergyProvider.legumes.length; // Add legumes count
                               }
-                              // Check if adding the selected group allergen exceeds the max limit
-                              if (totalAllergies < maxAllergies) {
-                                // Proceed with adding the group allergen and corresponding allergens
+                              
+                              if (totalAllergies < maxAllergies) { // Check if not exceeding max limit
                                 bool isDuplicate = allergyProvider.allergies
-                                    .map((allergy) => allergy.toLowerCase())
-                                    .contains(_selectedGroupAllergen!.toLowerCase());
+                                    .map((allergy) => Pluralize().singular(allergy).toLowerCase()) // Compare lowercase singular form to check for duplicates
+                                    .contains(Pluralize().singular(_selectedGroupAllergen!));
                                 if (!isDuplicate) {
-                                  allergyProvider.addAllergy(_selectedGroupAllergen!);
-                                  if (_selectedGroupAllergen == 'Tree Nuts') {
-                                    allergyProvider.treeNuts.forEach((treeNut) {
-                                      if (!allergyProvider.allergies.contains(treeNut)) {
-                                        allergyProvider.addAllergy(treeNut);
+                                  allergyProvider.addAllergy(_selectedGroupAllergen!); // Add the selected group allergen
+                                  if (_selectedGroupAllergen == 'Tree Nuts') { // Check selected group allergen
+                                    allergyProvider.treeNuts.forEach((treeNut) { // For each tree nut in the list
+                                      if (!allergyProvider.allergies.contains(treeNut)) { // Check if not already in allergies list
+                                        allergyProvider.addAllergy(treeNut); // Add tree nut to allergies list
                                       }
                                     });
-                                  } else if (_selectedGroupAllergen == 'Crustacean Shellfish') {
-                                    allergyProvider.crustaceanShellfish.forEach((shellfish) {
-                                      if (!allergyProvider.allergies.contains(shellfish)) {
-                                        allergyProvider.addAllergy(shellfish);
+                                  } else if (_selectedGroupAllergen == 'Crustacean Shellfish') { // Check selected group allergen
+                                    allergyProvider.crustaceanShellfish.forEach((shellfish) { // For each shellfish in the list
+                                      if (!allergyProvider.allergies.contains(shellfish)) { // Check if not already in allergies list
+                                        allergyProvider.addAllergy(shellfish); // Add shellfish to allergies list
                                       }
                                     });
-                                  } else if (_selectedGroupAllergen == 'Fish') {
-                                    allergyProvider.fish.forEach((fish) {
-                                      if (!allergyProvider.allergies.contains(fish)) {
-                                        allergyProvider.addAllergy(fish);
+                                  } else if (_selectedGroupAllergen == 'Fish') { // Check selected group allergen
+                                    allergyProvider.fish.forEach((fish) { // For each fish in the list
+                                      if (!allergyProvider.allergies.contains(fish)) { // Check if not already in allergies list
+                                        allergyProvider.addAllergy(fish); // Add fish to allergies list
                                       }
                                     });
-                                  } else if (_selectedGroupAllergen == 'Legumes') {
-                                    allergyProvider.legumes.forEach((legume) {
-                                      if (!allergyProvider.allergies.contains(legume)) {
-                                        allergyProvider.addAllergy(legume);
+                                  } else if (_selectedGroupAllergen == 'Legumes') { // Check selected group allergen
+                                    allergyProvider.legumes.forEach((legume) { // For each legume in the list
+                                      if (!allergyProvider.allergies.contains(legume)) { // Check if not already in allergies list
+                                        allergyProvider.addAllergy(legume); // Add legume to allergies list
                                       }
                                     });
                                   }
+                                  setState(() {
+                                    _selectedGroupAllergen = null; // Clear selected group allergen
+                                  });
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('This group allergen is already in the list')),
+                                    SnackBar(content: Text('This group allergen is already in the list')), // Show duplicate group allergen message
                                   );
                                 }
-                                setState(() {
-                                  _selectedGroupAllergen = null;
-                                });
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Adding this group allergen exceeds the maximum limit of 30 allergies')),
+                                  SnackBar(content: Text('Adding this group allergen exceeds the maximum limit of 30 allergies')), // Show max allergies message
                                 );
                               }
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Please select a group allergen')),
+                                SnackBar(content: Text('Please select a group allergen')), // Show empty group allergen message
                               );
                             }
                           },
@@ -344,5 +350,11 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
         },
       ),
     );
+  }
+
+  //For readable formatting on frontend
+  String _capitalizeFirstLetter(String text) {
+    if (text.isEmpty) return '';
+    return text.toLowerCase().split(' ').map((word) => word[0].toUpperCase() + word.substring(1)).join(' ');
   }
 }

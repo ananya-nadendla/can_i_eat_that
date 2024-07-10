@@ -4,20 +4,23 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
-### [0.4.4] - 2024-07-10
+### [0.4.6] - 2024-07-10
 
 - BUG FIX
-    1) Solve issue of no matching because of plurals 
+    1) Duplicate Plurals - user cannot enter either singular / plural version of same allergen
+    2) Formatting - allergen is formatted to Title Case regardless of how user capitalized 
+        (note: lowercase still used for comparison)
+    3) Solve issue of no matching because of plurals 
         ----> (i.e user enters "Almonds" but ingredients say "Almond")
         ----> (i.e user enters "Anchovy" but ingredients say "Anchovies")
         ----> (i.e user enters "Molasses" which is already in singular / plural form)
-    2) Fixed - App wouldn't render allergens from a food group that user entered seperately through TextField 
+    4) Fixed - App wouldn't render allergens from a food group that user entered seperately through TextField 
         (Ex) User entered Anchovies in TextField (included in Fish Food Group), but wouldn't show on screen
-    3) Updated Max Allergies to 30 allergens 
-    4) Fixed - User was able to add more than 30 allergies if (current allergies) was < 30 and (wanted allergies + current allergies ) > 30
+    5) Updated Max Allergies to 30 allergens 
+    6) Fixed - User was able to add more than 30 allergies if (current allergies) was < 30 and (wanted allergies + current allergies ) > 30
 
-- TODO:
-    1) Format user's capitalization errors (i.e HOney shows up as Honey)
+- TODO: 
+    1) UI Design
 
 ### [0.4.0] - 2024-07-08
 - MINOR FEATURE

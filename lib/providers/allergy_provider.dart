@@ -23,7 +23,7 @@ class AllergyProvider extends ChangeNotifier {
     'Prawn'
   ];
   final List<String> _fish = [
-    'Anchovy', //issue - how to deal with "Anchovies", where plural is different?
+    'Anchovy', 
     'Bass',
     'Catfish',
     'Cod',
@@ -33,7 +33,7 @@ class AllergyProvider extends ChangeNotifier {
     'Hake',
     'Halibut',
     'Herring',
-    'Mahi mahi',
+    'Mahi Mahi',
     'Perch',
     'Pike',
     'Pollock',
