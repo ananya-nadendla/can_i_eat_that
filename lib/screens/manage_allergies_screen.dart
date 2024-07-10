@@ -270,53 +270,66 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                           icon: Icon(Icons.add), // Add icon button
                           onPressed: () {
                             if (_selectedGroupAllergen != null) { // Check if a group allergen is selected
-                              if (allergyProvider.allergies.length < maxAllergies) { // Check if not exceeding max limit
+                              // Calculate the total allergies if we add the selected group
+                              int totalAllergies = allergyProvider.allergies.length;
+                              if (_selectedGroupAllergen == 'Tree Nuts') {
+                                totalAllergies += allergyProvider.treeNuts.length;
+                              } else if (_selectedGroupAllergen == 'Crustacean Shellfish') {
+                                totalAllergies += allergyProvider.crustaceanShellfish.length;
+                              } else if (_selectedGroupAllergen == 'Fish') {
+                                totalAllergies += allergyProvider.fish.length;
+                              } else if (_selectedGroupAllergen == 'Legumes') {
+                                totalAllergies += allergyProvider.legumes.length;
+                              }
+                              // Check if adding the selected group allergen exceeds the max limit
+                              if (totalAllergies < maxAllergies) {
+                                // Proceed with adding the group allergen and corresponding allergens
                                 bool isDuplicate = allergyProvider.allergies
-                                    .map((allergy) => allergy.toLowerCase()) // Compare lowercase to check for duplicates
+                                    .map((allergy) => allergy.toLowerCase())
                                     .contains(_selectedGroupAllergen!.toLowerCase());
-                                if (!isDuplicate) { // Check for duplicates
-                                  allergyProvider.addAllergy(_selectedGroupAllergen!); // Add selected group allergen
+                                if (!isDuplicate) {
+                                  allergyProvider.addAllergy(_selectedGroupAllergen!);
                                   if (_selectedGroupAllergen == 'Tree Nuts') {
                                     allergyProvider.treeNuts.forEach((treeNut) {
                                       if (!allergyProvider.allergies.contains(treeNut)) {
-                                        allergyProvider.addAllergy(treeNut); // Add corresponding tree nuts
+                                        allergyProvider.addAllergy(treeNut);
                                       }
                                     });
                                   } else if (_selectedGroupAllergen == 'Crustacean Shellfish') {
                                     allergyProvider.crustaceanShellfish.forEach((shellfish) {
                                       if (!allergyProvider.allergies.contains(shellfish)) {
-                                        allergyProvider.addAllergy(shellfish); // Add corresponding shellfish
+                                        allergyProvider.addAllergy(shellfish);
                                       }
                                     });
                                   } else if (_selectedGroupAllergen == 'Fish') {
                                     allergyProvider.fish.forEach((fish) {
                                       if (!allergyProvider.allergies.contains(fish)) {
-                                        allergyProvider.addAllergy(fish); // Add corresponding fish
+                                        allergyProvider.addAllergy(fish);
                                       }
                                     });
                                   } else if (_selectedGroupAllergen == 'Legumes') {
                                     allergyProvider.legumes.forEach((legume) {
                                       if (!allergyProvider.allergies.contains(legume)) {
-                                        allergyProvider.addAllergy(legume); // Add corresponding legumes
+                                        allergyProvider.addAllergy(legume);
                                       }
                                     });
                                   }
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('This group allergen is already in the list')), // Show duplicate message
+                                    SnackBar(content: Text('This group allergen is already in the list')),
                                   );
                                 }
                                 setState(() {
-                                  _selectedGroupAllergen = null; // Reset selected group allergen
+                                  _selectedGroupAllergen = null;
                                 });
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('You can add a maximum of 30 allergies')), // Show max allergies message
+                                  SnackBar(content: Text('Adding this group allergen exceeds the maximum limit of 30 allergies')),
                                 );
                               }
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Please select a group allergen')), // Show empty group allergen message
+                                SnackBar(content: Text('Please select a group allergen')),
                               );
                             }
                           },

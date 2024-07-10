@@ -4,12 +4,13 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
-### [0.4.2] - 2024-07-10
+### [0.4.4] - 2024-07-10
 
 - BUG FIX
     1) Fixed - App wouldn't render allergens from a food group that user entered seperately through TextField 
         (Ex) User entered Anchovies in TextField (included in Fish Food Group), but wouldn't show on screen
     2) Updated Max Allergies to 30 allergens 
+    3) Fixed - User was able to add more than 30 allergies if (current allergies) was < 30 and (wanted allergies + current allergies ) > 30
 
 - TODO:
     1) Solve issue of plurals 
@@ -22,14 +23,6 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 ### [0.4.0] - 2024-07-08
 - MINOR FEATURE
     1) Added "Crustacean Shellfish", "Legumes", and "Fish" to food group allergy in Dropdown with "Tree Nuts"
-
-- TODO:
-    1) ISSUE - I cant add food gorup allergens seperaltey through textfield - aka anchovies (shows in array but does not render in app)
-    1) Solve issue of plurals 
-    ----> (i.e user enters "Almonds" but ingredients say "Almond")
-    ----> (i.e user enters "Anchovy" but ingredients say "Anchovies")
-    2) Format user's capitalization errors (i.e HOney shows up as Honey)
-
 
 ### [0.3.1] - 2024-07-07
 - BUG FIX

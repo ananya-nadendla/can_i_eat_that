@@ -169,13 +169,13 @@ class AllergyProvider extends ChangeNotifier {
   Future<void> _saveAllergies() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('allergies', _allergies);
-    print('Saved allergies: $_allergies'); // Debugging line
+    print('Saved allergies (${_allergies.length}): $_allergies');  //Debugging line
   }
 
   Future<void> _loadAllergies() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _allergies = prefs.getStringList('allergies') ?? [];
-    print('Loaded allergies: $_allergies'); // Debugging line
+    print('Loaded allergies (${_allergies.length}): $_allergies'); 
     notifyListeners();
   }
 }
