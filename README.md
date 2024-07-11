@@ -4,6 +4,14 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
+
+### [0.4.8] - 2024-07-10
+
+- BUG FIX
+    1) Allergens are formatted to Title Case on MatchingAllergensScreen 
+    2) Red Warning Icon next to matching allergen in MatchingAllergensScreen
+    (Note) Debugging - put back printed ingredients (accidentally removed in earlier version)
+
 ### [0.4.6] - 2024-07-10
 
 - BUG FIX

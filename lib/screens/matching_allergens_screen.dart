@@ -17,7 +17,8 @@ class MatchingAllergensScreen extends StatelessWidget {
           child: Column( // Column to vertically align list of matching allergens
             children: matchingAllergens.map((allergen) {
               return ListTile( // ListTile for each matching allergen
-                title: Text(allergen), // Display the name of the allergen
+                leading: Icon(Icons.warning, color: Colors.red), // Red warning icon before the allergen
+                title: Text(_capitalizeFirstLetter(allergen)), // Display the name of the allergen
               );
             }).toList(), // Convert the mapped list into a list of widgets
           ),
@@ -26,3 +27,10 @@ class MatchingAllergensScreen extends StatelessWidget {
     );
   }
 }
+
+
+//For readable formatting on frontend
+  String _capitalizeFirstLetter(String text) {
+    if (text.isEmpty) return '';
+    return text.toLowerCase().split(' ').map((word) => word[0].toUpperCase() + word.substring(1)).join(' ');
+  }
