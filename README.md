@@ -5,6 +5,21 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 ## Version Information
 
 
+### [0.5.0] - 2024-07-17
+- MINOR UPDATE
+    1) Crossreference each scanned ingredient with Merriam Webster Dictionary API
+      (a) If >= 90% of words are validated, ingredient-allergen matching logic ensues
+      (b) If <90% of words are valid, "photo is unclear" message is shown
+      (c: BACKEND)
+        (c.a) If word is invalid, closest suggestions are listed
+        (c.b) Finds best suggestion using string_similarity package
+
+- ISSUES TO PATCH
+    1) "degermed" is not in Merriam's Collegiate Dictionary (its in medical)
+    2) Word validation is very slow
+    3) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
+
+
 ### [0.4.8] - 2024-07-10
 
 - BUG FIX
