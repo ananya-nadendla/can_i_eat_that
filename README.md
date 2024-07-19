@@ -108,13 +108,12 @@ This project uses an environment file (`.env`) to store API Keys for security pu
 
 2.  **Sign Up For Merriam-Webster API**
 
-   Sign Up Link: https://dictionaryapi.com/register/index
-    
-   For "Request API Key (1)", choose "Collegiate Dictionary" from dropdown
-   For "Request API Key (2)", choose "Medical Dictionary" from dropdown
+    Sign Up Link: https://dictionaryapi.com/register/index
+    - For or "Request API Key (1)", choose "Collegiate Dictionary" from dropdown
+    - For "Request API Key (2)", choose "Medical Dictionary" from dropdown
 
 
-2. **Add Your API Keys:**
+4. **Add Your API Keys:**
 
    Open the `.env` file and replace the placeholder values with your actual API keys. For example:
 
