@@ -2,8 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:food_allergy_scanner/providers/allergy_provider.dart';
 import 'package:food_allergy_scanner/screens/home_screen.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Ensure binding is initialized
+  try {
+    await dotenv.load(fileName: ".env");
+    print('Environment variables loaded successfully.');
+  } catch (e) {
+    print('Error loading environment variables: $e');
+  }
   runApp(const MyApp());
 }
 

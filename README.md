@@ -4,6 +4,17 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
+### [0.5.5] - 2024-07-19
+- BUG FIX
+    1) Made ingredient validation logic simpler (performance is faster now)
+    2) Use both Webster's medical / collegiate dictionary for word validation (medical handles words like "degermed")
+    3) Put API Key in enviroment variables file (.env)
+    4) Made .env_sample to show how to import API keys
+    5) Added "USAGE / Enviroment Configuration" section to README
+
+- TO DO:
+    1) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
+    2) UI Design
 
 ### [0.5.0] - 2024-07-17
 - MINOR UPDATE
@@ -13,12 +24,6 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
       (c: BACKEND)
         (c.a) If word is invalid, closest suggestions are listed
         (c.b) Finds best suggestion using string_similarity package
-
-- ISSUES TO PATCH
-    1) "degermed" is not in Merriam's Collegiate Dictionary (its in medical)
-    2) Word validation is very slow
-    3) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
-
 
 ### [0.4.8] - 2024-07-10
 
@@ -41,9 +46,6 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
         (Ex) User entered Anchovies in TextField (included in Fish Food Group), but wouldn't show on screen
     5) Updated Max Allergies to 30 allergens 
     6) Fixed - User was able to add more than 30 allergies if (current allergies) was < 30 and (wanted allergies + current allergies ) > 30
-
-- TODO: 
-    1) UI Design
 
 ### [0.4.0] - 2024-07-08
 - MINOR FEATURE
@@ -92,3 +94,34 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
     - (Ex) Allergen: YouTube
         NOT MATCH: Tube, You
         MATCH: YouTube, Youtube, youtube, YOUTUBE
+
+## Usage
+### Environment Configuration
+
+This project uses an environment file (`.env`) to store API Keys for security purposes.
+
+#### Setting Up the `.env` File
+
+1. **Copy the Sample File:**
+
+   Create a copy of the `.env_sample` file and name it `.env` in the root directory of your project.
+
+2.  **Sign Up For Merriam-Webster API**
+
+   Sign Up Link: https://dictionaryapi.com/register/index
+    
+   For "Request API Key (1)", choose "Collegiate Dictionary" from dropdown
+   For "Request API Key (2)", choose "Medical Dictionary" from dropdown
+
+
+2. **Add Your API Keys:**
+
+   Open the `.env` file and replace the placeholder values with your actual API keys. For example:
+
+   ```plaintext
+   # Your Merriam-Webster Collegiate API Key
+   API_KEY_MERRIAM_WEBSTER_COLLEGIATE_DICTIONARY=your_actual_collegiate_api_key
+
+   # Your Merriam-Webster Medical API Key
+   API_KEY_MERRIAM_WEBSTER_MEDICAL_DICTIONARY=your_actual_medical_api_key
+

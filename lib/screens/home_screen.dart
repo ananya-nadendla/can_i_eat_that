@@ -33,62 +33,37 @@ class HomeScreen extends StatelessWidget {
   int validCount = 0;
   int totalCount = 0;
 
-  List<String> ingredients = text.split(RegExp(r'\s*[\(\),.!?]+\s*'));
+  List<String> words = text.split(RegExp(r'[\s,.;!?()]+'));
 
-  for (String ingredient in ingredients) {
-    print("Ingredient: $ingredient");
+  for (String word in words) {
+    print("Word: $word");
 
-    String normalizedIngredient = normalizeAccents(ingredient);
+    String normalizedWord = normalizeAccents(word);
+    String cleanedWord = removePunctuation(normalizedWord.trim());
 
-    List<String> words = [];
-    words = normalizedIngredient.split(RegExp(r'[\s,.!?]+'));
-
-    List<String> cleanedIngredients = [];
-    for (String word in words) {
-      String cleanedWord = removePunctuation(word.trim());
-      if (cleanedWord.isNotEmpty) {
-        if (RegExp(r'\d').hasMatch(cleanedWord)) {
-          print('Skipping word with digits: $cleanedWord');
-          continue;
-        }
-        cleanedIngredients.add(cleanedWord);
+    if (cleanedWord.isNotEmpty) {
+      if (RegExp(r'\d').hasMatch(cleanedWord)) {
+        print('Skipping word with digits: $cleanedWord'); //i.e "B3" in Vitamin B3
+        continue;
       }
-    }
+      if (cleanedWord.toLowerCase() == 'vit') { //"vit" for "Vitamin"
+        print('Skipping abbreviation: $cleanedWord');
+        continue;
+      }
 
-    bool isIngredientValid = true;
-    for (String cleanedIngredient in cleanedIngredients) {
-      print('Validating Word: $cleanedIngredient');
-      bool isValid = await merriamWebsterService.isValidWord(cleanedIngredient.toLowerCase());
+      print('Validating Word: $cleanedWord');
+      bool isValid = await merriamWebsterService.isValidWord(cleanedWord.toLowerCase());
 
       if (!isValid) {
-        List<String> suggestions = await merriamWebsterService.getSuggestions(cleanedIngredient.toLowerCase());
+        List<String> suggestions = await merriamWebsterService.getSuggestions(cleanedWord.toLowerCase());
         if (suggestions.isNotEmpty) {
-          print('Suggestions for "$cleanedIngredient": ${suggestions.join(', ')}');
+          print('Suggestions for "$cleanedWord": ${suggestions.join(', ')}');
         } else {
-          print('No suggestions found for "$cleanedIngredient".');
-        }
-        isIngredientValid = false;
-      } else {
-        print('Word Validated: $cleanedIngredient');
-        validCount++;
-      }
-      totalCount++;
-    }
-
-    if (!isIngredientValid) {
-      print('Validating Ingredient: $ingredient');
-      bool isValid = await merriamWebsterService.isValidWord(normalizedIngredient.toLowerCase());
-
-      if (!isValid) {
-        List<String> suggestions = await merriamWebsterService.getSuggestions(normalizedIngredient.toLowerCase());
-        if (suggestions.isNotEmpty) {
-          print('Suggestions for "$ingredient": ${suggestions.join(', ')}');
-        } else {
-          print('No suggestions found for "$ingredient".');
+          print('No suggestions found for "$cleanedWord".');
         }
         isValidIngredients = false;
       } else {
-        print('Ingredient Validated: $ingredient');
+        print('Word Validated: $cleanedWord');
         validCount++;
       }
       totalCount++;
@@ -101,12 +76,9 @@ class HomeScreen extends StatelessWidget {
   if (validityPercentage < 90) {
     print('Photo unclear. Validity threshold not met.');
     return false;
-  }
-  else{
+  } else {
     return true;
   }
-
-  //return isValidIngredients;
 }
 
   // Function to initiate product scanning
@@ -143,7 +115,7 @@ class HomeScreen extends StatelessWidget {
             children: [
               Center(
                 child: Text(
-                  'Photo unclear. Please try again.',
+                  'Photo unclear or label contains many typos. Please try again.',
                 ),
               ),
             ],
