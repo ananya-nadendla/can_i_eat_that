@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,13 +9,16 @@ import 'package:food_allergy_scanner/screens/manage_allergies_screen.dart';
 import 'package:food_allergy_scanner/screens/matching_allergens_screen.dart';
 import 'package:food_allergy_scanner/services/merriam_webster_service.dart';
 
-class HomeScreen extends StatelessWidget {
-  // Function to remove punctuation from a string
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   String removePunctuation(String text) {
-    return text.replaceAll(RegExp(r'[^\w\s-]'), ''); // Remove all non-word characters except spaces and hyphens
+    return text.replaceAll(RegExp(r'[^\w\s-]'), ''); 
   }
 
-  // Function to normalize accented characters to their base forms
   String normalizeAccents(String input) {
     return input
         .replaceAll(RegExp(r'[àáâãäå]', caseSensitive: false), 'a')
@@ -27,48 +31,57 @@ class HomeScreen extends StatelessWidget {
         .replaceAll(RegExp(r'[ß]', caseSensitive: false), 'ss');
   }
 
- Future<bool> validateIngredients(String text) async {
+ Future<bool> validateIngredients(BuildContext context, String text, StreamController<int> progressStream) async {
   final merriamWebsterService = MerriamWebsterService();
   bool isValidIngredients = true;
   int validCount = 0;
   int totalCount = 0;
 
   List<String> words = text.split(RegExp(r'[\s,.;!?()]+'));
+  totalCount = words.length;
 
+  List<String> toValidate = [];
   for (String word in words) {
-    print("Word: $word");
-
     String normalizedWord = normalizeAccents(word);
     String cleanedWord = removePunctuation(normalizedWord.trim());
 
     if (cleanedWord.isNotEmpty) {
       if (RegExp(r'\d').hasMatch(cleanedWord)) {
-        print('Skipping word with digits: $cleanedWord'); //i.e "B3" in Vitamin B3
+        print('Skipping word with digits: $cleanedWord'); // i.e. "B3" in Vitamin B3
         continue;
       }
-      if (cleanedWord.toLowerCase() == 'vit') { //"vit" for "Vitamin"
+      if (cleanedWord.toLowerCase() == 'vit') { // "vit" for "Vitamin"
         print('Skipping abbreviation: $cleanedWord');
         continue;
       }
 
-      print('Validating Word: $cleanedWord');
-      bool isValid = await merriamWebsterService.isValidWord(cleanedWord.toLowerCase());
-
-      if (!isValid) {
-        List<String> suggestions = await merriamWebsterService.getSuggestions(cleanedWord.toLowerCase());
-        if (suggestions.isNotEmpty) {
-          print('Suggestions for "$cleanedWord": ${suggestions.join(', ')}');
-        } else {
-          print('No suggestions found for "$cleanedWord".');
-        }
-        isValidIngredients = false;
-      } else {
-        print('Word Validated: $cleanedWord');
-        validCount++;
-      }
-      totalCount++;
+      print('Adding to validation queue: $cleanedWord');
+      toValidate.add(cleanedWord);
     }
   }
+
+  // Perform API validation in parallel
+  List<Future<void>> validationFutures = toValidate.map((word) async {
+    print('Validating word: $word');
+    bool isValid = await merriamWebsterService.isValidWord(word.toLowerCase());
+    if (isValid) {
+      print('Word validated: $word');
+      validCount++;
+    } else {
+      print('Word not found in dictionary: $word');
+      List<String> suggestions = await merriamWebsterService.getSuggestions(word.toLowerCase());
+      if (suggestions.isNotEmpty) {
+        print('Suggestions for "$word": ${suggestions.join(', ')}');
+      } else {
+        print('No suggestions found for "$word".');
+      }
+      isValidIngredients = false;
+    }
+    progressStream.add(validCount);
+  }).toList();
+
+  // Wait for all validations to complete
+  await Future.wait(validationFutures);
 
   double validityPercentage = (validCount / totalCount) * 100;
   print('Validity Percentage: $validityPercentage%');
@@ -81,7 +94,6 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-  // Function to initiate product scanning
   Future<void> scanProduct(BuildContext context) async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.camera);
@@ -98,14 +110,32 @@ class HomeScreen extends StatelessWidget {
     // Print out all the ingredients that were scanned
     print('Scanned Ingredients: ${recognizedText.text}');
 
-    bool isValidIngredients = await validateIngredients(recognizedText.text);
+    // Create a StreamController for progress updates
+    final progressStream = StreamController<int>();
+
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return LoadingDialog(
+          totalIngredients: recognizedText.text.split(RegExp(r'[\s,.;!?()]+')).length,
+          progressStream: progressStream.stream,
+        );
+      },
+    );
+
+    bool isValidIngredients = await validateIngredients(context, recognizedText.text, progressStream);
+
+    // Close the StreamController
+    progressStream.close();
+
+    Navigator.of(context).pop(); // Close loading dialog
 
     if (!isValidIngredients) {
-      // Handle case where ingredients are not valid (e.g., show message, reset state)
       print('Invalid ingredients scanned');
       textRecognizer.close();
 
-      // Show dialog with scan result
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -132,16 +162,13 @@ class HomeScreen extends StatelessWidget {
       return;
     }
 
-    // Proceed with allergen matching logic
     AllergyProvider allergyProvider = Provider.of<AllergyProvider>(context, listen: false);
     List<String> allergies = allergyProvider.allergies;
     List<String> matchingAllergens = [];
 
-    // Check if any allergen matches with the recognized text
     bool isSafe = true;
     if (recognizedText.text.isNotEmpty) {
       for (String allergy in allergies) {
-        // Check both singular and plural forms
         String singular = Pluralize().singular(allergy);
         String plural = Pluralize().plural(allergy);
 
@@ -153,17 +180,15 @@ class HomeScreen extends StatelessWidget {
         if (regexSingular.hasMatch(recognizedText.text) || regexPlural.hasMatch(recognizedText.text)) {
           print('MATCH FOUND: "$allergy"');
           isSafe = false;
-          matchingAllergens.add(allergy); // Add matching allergen to the list
+          matchingAllergens.add(allergy);
         }
       }
     } else {
-      // No text was recognized
       isSafe = false;
     }
 
-    textRecognizer.close(); // Close the text recognizer
+    textRecognizer.close();
 
-    // Show dialog with scan result
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -181,7 +206,7 @@ class HomeScreen extends StatelessWidget {
             if (!isSafe && recognizedText.text.isNotEmpty)
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close the current dialog
+                  Navigator.of(context).pop();
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -203,7 +228,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // Function to navigate to manage allergies screen
   void manageAllergies(BuildContext context) {
     Navigator.push(
       context,
@@ -227,27 +251,62 @@ class HomeScreen extends StatelessWidget {
               children: <Widget>[
                 Text(
                   'Scan a product to check for allergens!',
+                  style: TextStyle(fontSize: 20),
                 ),
                 SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: hasAllergies
-                      ? () => scanProduct(context)
-                      : () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Please add at least one allergen before scanning.')),
-                          );
-                        },
+                  onPressed: hasAllergies ? () => scanProduct(context) : null,
                   child: Text('Scan Product'),
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () => manageAllergies(context),
+                  child: Text('Manage Allergies'),
                 ),
               ],
             ),
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => manageAllergies(context),
-        tooltip: 'Manage Allergies',
-        child: Icon(Icons.edit),
+    );
+  }
+}
+
+class LoadingDialog extends StatelessWidget {
+  final int totalIngredients;
+  final Stream<int> progressStream;
+
+  LoadingDialog({required this.totalIngredients, required this.progressStream});
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Validating Ingredients',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
+            StreamBuilder<int>(
+              stream: progressStream,
+              initialData: 0,
+              builder: (context, snapshot) {
+                double progress = totalIngredients > 0 ? snapshot.data! / totalIngredients : 0;
+                return Column(
+                  children: [
+                    LinearProgressIndicator(value: progress),
+                    SizedBox(height: 20),
+                    Text('${snapshot.data} / $totalIngredients'),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

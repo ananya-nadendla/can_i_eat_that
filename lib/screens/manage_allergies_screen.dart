@@ -291,8 +291,8 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                               
                               if (totalAllergies < maxAllergies) { // Check if not exceeding max limit
                                 bool isDuplicate = allergyProvider.allergies
-                                    .map((allergy) => Pluralize().singular(allergy).toLowerCase()) // Compare lowercase singular form to check for duplicates
-                                    .contains(Pluralize().singular(_selectedGroupAllergen!));
+                                    .map((allergy) => allergy.toLowerCase())
+                                    .contains(_selectedGroupAllergen!.toLowerCase());
                                 if (!isDuplicate) {
                                   allergyProvider.addAllergy(_selectedGroupAllergen!); // Add the selected group allergen
                                   if (_selectedGroupAllergen == 'Tree Nuts') { // Check selected group allergen
