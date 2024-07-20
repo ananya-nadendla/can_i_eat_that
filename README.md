@@ -4,6 +4,18 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
+### [0.6.2] - 2024-07-19
+- BUG FIX
+    1) HomeScreen --> progress bar shows correct amount of words to be validated
+    2) Replaced "Vit" abbreviation with "Vitamin"
+
+- TO DO:
+    1) Match allergens against validated words list, not ingredients list
+    2) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
+    3) Adjustable Camera Viewfinder when taking photo 
+    4) UI Design
+
+
 ### [0.6.0] - 2024-07-19
 - MINOR UPDATE
     1) Progress bar that loads while ingredients are being scanned
@@ -12,13 +24,6 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 - BUG FIX
     1) Duplicate group allergen snackbar error - accidentally removed earlier, now put back
     2) Made README more readable
-
-- TO DO:
-    1) homeScreen - totalCount and totalWordsChecked are different (off by 1)
-    2) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
-    3) Adjustable Camera Viewfinder when taking photo 
-    4) UI Design
-
 
 ### [0.5.5] - 2024-07-19
 - BUG FIX

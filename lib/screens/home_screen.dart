@@ -16,7 +16,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String removePunctuation(String text) {
-    return text.replaceAll(RegExp(r'[^\w\s-]'), ''); 
+    return text.replaceAll(RegExp(r'[^\w\s-]'), '');
   }
 
   String normalizeAccents(String input) {
@@ -31,16 +31,17 @@ class _HomeScreenState extends State<HomeScreen> {
         .replaceAll(RegExp(r'[ß]', caseSensitive: false), 'ss');
   }
 
- Future<bool> validateIngredients(BuildContext context, String text, StreamController<int> progressStream) async {
+ Future<bool> validateIngredients(BuildContext context, String text, StreamController<int> progressStream, int totalCount) async {
   final merriamWebsterService = MerriamWebsterService();
   bool isValidIngredients = true;
   int validCount = 0;
-  int totalCount = 0;
 
   List<String> words = text.split(RegExp(r'[\s,.;!?()]+'));
-  totalCount = words.length;
+  words = words.where((word) => word.isNotEmpty).toList(); // Remove empty words
 
   List<String> toValidate = [];
+  int validationQueueCount = 0;
+
   for (String word in words) {
     String normalizedWord = normalizeAccents(word);
     String cleanedWord = removePunctuation(normalizedWord.trim());
@@ -50,22 +51,29 @@ class _HomeScreenState extends State<HomeScreen> {
         print('Skipping word with digits: $cleanedWord'); // i.e. "B3" in Vitamin B3
         continue;
       }
-      if (cleanedWord.toLowerCase() == 'vit') { // "vit" for "Vitamin"
-        print('Skipping abbreviation: $cleanedWord');
-        continue;
+
+      if (cleanedWord.toLowerCase() == 'vit') { // Replace "vit" with "Vitamin"
+        print('Replacing abbreviation: $cleanedWord with "Vitamin"');
+        cleanedWord = 'Vitamin';
       }
 
-      print('Adding to validation queue: $cleanedWord');
+      validationQueueCount++;
+      print('Adding to validation queue ($validationQueueCount): $cleanedWord');
       toValidate.add(cleanedWord);
     }
   }
 
   // Perform API validation in parallel
+  int validatingWordCount = 0;
+  int validatedWordCount = 0;
+
   List<Future<void>> validationFutures = toValidate.map((word) async {
-    print('Validating word: $word');
+    validatingWordCount++;
+    print('Validating word ($validatingWordCount): $word');
     bool isValid = await merriamWebsterService.isValidWord(word.toLowerCase());
     if (isValid) {
-      print('Word validated: $word');
+      validatedWordCount++;
+      print('Word validated ($validatedWordCount): $word');
       validCount++;
     } else {
       print('Word not found in dictionary: $word');
@@ -84,6 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
   await Future.wait(validationFutures);
 
   double validityPercentage = (validCount / totalCount) * 100;
+  print('Valid Count: $validCount, TotalCount: $totalCount'); // Check the correct total count
   print('Validity Percentage: $validityPercentage%');
 
   if (validityPercentage < 90) {
@@ -95,98 +104,70 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
   Future<void> scanProduct(BuildContext context) async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.camera);
+  final ImagePicker picker = ImagePicker();
+  final XFile? image = await picker.pickImage(source: ImageSource.camera);
 
-    if (image == null) {
-      // User canceled the picker
-      return;
-    }
+  if (image == null) {
+    // User canceled the picker
+    return;
+  }
 
-    final InputImage inputImage = InputImage.fromFilePath(image.path);
-    final textRecognizer = TextRecognizer();
-    final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
+  final InputImage inputImage = InputImage.fromFilePath(image.path);
+  final textRecognizer = TextRecognizer();
+  final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
 
-    // Print out all the ingredients that were scanned
-    print('Scanned Ingredients: ${recognizedText.text}');
+  // Print out all the ingredients that were scanned
+  print('Scanned Ingredients: ${recognizedText.text}');
 
-    // Create a StreamController for progress updates
-    final progressStream = StreamController<int>();
+  // Create a StreamController for progress updates
+  final progressStream = StreamController<int>();
 
-    // Show loading dialog
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return LoadingDialog(
-          totalIngredients: recognizedText.text.split(RegExp(r'[\s,.;!?()]+')).length,
-          progressStream: progressStream.stream,
-        );
-      },
-    );
+  // Prepare the list of words and handle replacements
+  List<String> words = recognizedText.text.split(RegExp(r'[\s,.;!?()]+'));
+  List<String> toValidate = [];
+  int totalCount = 0;
 
-    bool isValidIngredients = await validateIngredients(context, recognizedText.text, progressStream);
+  for (String word in words) {
+    String normalizedWord = normalizeAccents(word);
+    String cleanedWord = removePunctuation(normalizedWord.trim());
 
-    // Close the StreamController
-    progressStream.close();
-
-    Navigator.of(context).pop(); // Close loading dialog
-
-    if (!isValidIngredients) {
-      print('Invalid ingredients scanned');
-      textRecognizer.close();
-
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Center(child: Text('Scan Result')),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Text(
-                  'Photo unclear or label contains many typos. Please try again.',
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('OK'),
-            ),
-          ],
-        ),
-      );
-
-      return;
-    }
-
-    AllergyProvider allergyProvider = Provider.of<AllergyProvider>(context, listen: false);
-    List<String> allergies = allergyProvider.allergies;
-    List<String> matchingAllergens = [];
-
-    bool isSafe = true;
-    if (recognizedText.text.isNotEmpty) {
-      for (String allergy in allergies) {
-        String singular = Pluralize().singular(allergy);
-        String plural = Pluralize().plural(allergy);
-
-        RegExp regexSingular = RegExp(r"\b" + RegExp.escape(singular) + r"\b", caseSensitive: false);
-        RegExp regexPlural = RegExp(r"\b" + RegExp.escape(plural) + r"\b", caseSensitive: false);
-
-        print('Checking: Singular: $singular, Plural: $plural');
-
-        if (regexSingular.hasMatch(recognizedText.text) || regexPlural.hasMatch(recognizedText.text)) {
-          print('MATCH FOUND: "$allergy"');
-          isSafe = false;
-          matchingAllergens.add(allergy);
-        }
+    if (cleanedWord.isNotEmpty) {
+      if (RegExp(r'\d').hasMatch(cleanedWord)) {
+        print('Skipping word with digits: $cleanedWord'); // i.e. "B3" in Vitamin B3
+        continue;
       }
-    } else {
-      isSafe = false;
-    }
 
+      if (cleanedWord.toLowerCase() == 'vit') { // Replace "vit" with "Vitamin"
+        print('Replacing abbreviation: $cleanedWord with "Vitamin"');
+        cleanedWord = 'Vitamin';
+      }
+
+      toValidate.add(cleanedWord);
+      totalCount++;
+    }
+  }
+
+  // Show loading dialog
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) {
+      return LoadingDialog(
+        totalIngredients: totalCount,
+        progressStream: progressStream.stream,
+      );
+    },
+  );
+
+  bool isValidIngredients = await validateIngredients(context, recognizedText.text, progressStream, totalCount);
+
+  // Close the StreamController
+  progressStream.close();
+
+  Navigator.of(context).pop(); // Close loading dialog
+
+  if (!isValidIngredients) {
+    print('Invalid ingredients scanned');
     textRecognizer.close();
 
     showDialog(
@@ -198,24 +179,9 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Center(
               child: Text(
-                recognizedText.text.isNotEmpty
-                    ? (isSafe ? 'The product is safe to eat!' : 'The product contains allergens!')
-                    : 'No text was recognized!',
+                'Photo unclear or label contains many typos. Please try again.',
               ),
             ),
-            if (!isSafe && recognizedText.text.isNotEmpty)
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => MatchingAllergensScreen(matchingAllergens: matchingAllergens),
-                    ),
-                  );
-                },
-                child: Text('See Details'),
-              ),
           ],
         ),
         actions: [
@@ -226,7 +192,75 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+
+    return;
   }
+
+  AllergyProvider allergyProvider = Provider.of<AllergyProvider>(context, listen: false);
+  List<String> allergies = allergyProvider.allergies;
+  List<String> matchingAllergens = [];
+
+  bool isSafe = true;
+  if (recognizedText.text.isNotEmpty) {
+    for (String allergy in allergies) {
+      String singular = Pluralize().singular(allergy);
+      String plural = Pluralize().plural(allergy);
+
+      RegExp regexSingular = RegExp(r"\b" + RegExp.escape(singular) + r"\b", caseSensitive: false);
+      RegExp regexPlural = RegExp(r"\b" + RegExp.escape(plural) + r"\b", caseSensitive: false);
+
+      print('Checking: Singular: $singular, Plural: $plural');
+
+      if (regexSingular.hasMatch(recognizedText.text) || regexPlural.hasMatch(recognizedText.text)) {
+        print('MATCH FOUND: "$allergy"');
+        isSafe = false;
+        matchingAllergens.add(allergy);
+      }
+    }
+  } else {
+    isSafe = false;
+  }
+
+  textRecognizer.close();
+
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Center(child: Text('Scan Result')),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Center(
+            child: Text(
+              recognizedText.text.isNotEmpty
+                  ? (isSafe ? 'The product is safe to eat!' : 'The product contains allergens!')
+                  : 'No text was recognized!',
+            ),
+          ),
+          if (!isSafe && recognizedText.text.isNotEmpty)
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MatchingAllergensScreen(matchingAllergens: matchingAllergens),
+                  ),
+                );
+              },
+              child: Text('See Details'),
+            ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text('OK'),
+        ),
+      ],
+    ),
+  );
+}
 
   void manageAllergies(BuildContext context) {
     Navigator.push(
@@ -295,12 +329,12 @@ class LoadingDialog extends StatelessWidget {
               stream: progressStream,
               initialData: 0,
               builder: (context, snapshot) {
-                double progress = totalIngredients > 0 ? snapshot.data! / totalIngredients : 0;
+                int progress = snapshot.data!;
                 return Column(
                   children: [
-                    LinearProgressIndicator(value: progress),
-                    SizedBox(height: 20),
-                    Text('${snapshot.data} / $totalIngredients'),
+                    LinearProgressIndicator(value: progress / totalIngredients),
+                    SizedBox(height: 10),
+                    Text('$progress / $totalIngredients'),
                   ],
                 );
               },
