@@ -8,9 +8,11 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 - BUG FIX
     1) HomeScreen --> progress bar shows correct amount of words to be validated
     2) Replaced "Vit" abbreviation with "Vitamin"
+    (note) DID NOT IMPLEMENT [Match allergens against validated words list, not ingredients list] because "White Wine Vinegar" is "White", "Wine", "Vinegar"
 
 - TO DO:
-    1) Match allergens against validated words list, not ingredients list
+    1) Handle more abbreviations
+        (ex): vit, fd&c
     2) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
     3) Adjustable Camera Viewfinder when taking photo 
     4) UI Design
