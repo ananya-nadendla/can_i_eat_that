@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AllergyProvider extends ChangeNotifier {
   List<String> _allergies = [];
+  final List<String> predefinedValidWords = ['vit', 'fd&c', 'd&c'];
+
   final List<String> _treeNuts = [
     'Almond',
     'Brazil Nut',
