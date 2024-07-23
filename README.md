@@ -4,11 +4,13 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
-### [0.6.4] - 2024-07-23
+### [0.6.6] - 2024-07-23
 - BUG FIX
     1) Changed counter to show # of words being validated, NOT number of valid words
     2) Made pre-validation for special words (abbreviations: vit, fd&c)
         (a) REMOVED: Replaced "Vit" abbreviation with "Vitamin"
+    3) If 90%+ (excluding 100%) words were validated, a warning message is shown that not all words were recognized.
+    4) Put back Snackbar error - enter allergen before scanning product
 
 - TO DO:
     1) Replace abbreviations with actual words when matching? (Aka replace "vit" with "Vitamin)?

@@ -31,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
         .replaceAll(RegExp(r'[ß]', caseSensitive: false), 'ss');
   }
 
-  Future<bool> validateIngredients(
+  Future<Map<String, dynamic>> validateIngredients(
     BuildContext context,
     String text,
     StreamController<int> progressStream,
@@ -99,12 +99,10 @@ class _HomeScreenState extends State<HomeScreen> {
     print('Valid Count: $validCount, TotalCount: $totalCount'); // Check the correct total count
     print('Validity Percentage: $validityPercentage%');
 
-    if (validityPercentage < 90) {
-      print('Photo unclear. Validity threshold not met.');
-      return false;
-    } else {
-      return true;
-    }
+    return {
+      'isValidIngredients': isValidIngredients,
+      'validityPercentage': validityPercentage
+    };
   }
 
   Future<void> scanProduct(BuildContext context) async {
@@ -155,13 +153,15 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
 
-    bool isValidIngredients = await validateIngredients(context, recognizedText.text, progressStream, totalCount);
+    final validationResult = await validateIngredients(context, recognizedText.text, progressStream, totalCount);
+    bool isValidIngredients = validationResult['isValidIngredients'];
+    double validityPercentage = validationResult['validityPercentage'];
 
     // Close the StreamController
     progressStream.close();
     Navigator.of(context).pop(); // Close loading dialog
 
-    if (!isValidIngredients) {
+    if (validityPercentage < 90) {
       print('Invalid ingredients scanned');
       textRecognizer.close();
       showDialog(
@@ -228,6 +228,31 @@ class _HomeScreenState extends State<HomeScreen> {
                     : 'No text was recognized!',
               ),
             ),
+            if (validityPercentage >= 90 && validityPercentage < 100)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Container(
+                  padding: EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    color: Colors.yellow[100],
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.warning, color: Colors.orange),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Some ingredients were unrecognizable due to unclear photo / typos. Discretion is advised.',
+                          style: TextStyle(color: Colors.orange),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             if (!isSafe && recognizedText.text.isNotEmpty)
               TextButton(
                 onPressed: () {
@@ -243,6 +268,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
           ],
         ),
+
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -279,7 +305,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: hasAllergies ? () => scanProduct(context) : null,
+                  onPressed: hasAllergies
+                      ? () => scanProduct(context)
+                      : () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Please add at least one allergen before scanning.')),
+                          );
+                        },
                   child: Text('Scan Product'),
                 ),
                 SizedBox(height: 20),
