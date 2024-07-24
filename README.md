@@ -4,19 +4,28 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
+
+### [0.7.0] - 2024-07-24
+- MINOR FEATURE
+    - Another loading spinner (processing_dialog_widget.dart) signifying ingredients being scanned (before validation loading_dialog_widget.dart)
+
+- TO DO:
+    1) Make a loading bar for  (3) Matching Ingredients-Allergens
+    2) Replace abbreviations with actual words when matching? (Aka replace "vit" with "Vitamin)?
+    3) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
+    4) Adjustable Camera Viewfinder when taking photo 
+    5) UI Design
+    6) Deal with frames skipping warning
+
+
 ### [0.6.6] - 2024-07-23
 - BUG FIX
     1) Changed counter to show # of words being validated, NOT number of valid words
+        (note) : loading bar works properly
     2) Made pre-validation for special words (abbreviations: vit, fd&c)
         (a) REMOVED: Replaced "Vit" abbreviation with "Vitamin"
     3) If 90%+ (excluding 100%) words were validated, a warning message is shown that not all words were recognized.
     4) Put back Snackbar error - enter allergen before scanning product
-
-- TO DO:
-    1) Replace abbreviations with actual words when matching? (Aka replace "vit" with "Vitamin)?
-    2) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
-    3) Adjustable Camera Viewfinder when taking photo 
-    4) UI Design
 
 
 ### [0.6.2] - 2024-07-19

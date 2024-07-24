@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-
 class LoadingDialog extends StatelessWidget {
   final int totalIngredients;
-  final int validatedIngredients;
+  final Stream<int> progressStream;
 
-  LoadingDialog({required this.totalIngredients, required this.validatedIngredients});
+  LoadingDialog({required this.totalIngredients, required this.progressStream});
 
   @override
   Widget build(BuildContext context) {
-    double progress = totalIngredients > 0 ? validatedIngredients / totalIngredients : 0;
-
     return Dialog(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -21,9 +18,20 @@ class LoadingDialog extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 20),
-            LinearProgressIndicator(value: progress),
-            SizedBox(height: 20),
-            Text('$validatedIngredients / $totalIngredients'),
+            StreamBuilder<int>(
+              stream: progressStream,
+              initialData: 0,
+              builder: (context, snapshot) {
+                int progress = snapshot.data!;
+                return Column(
+                  children: [
+                    LinearProgressIndicator(value: progress / totalIngredients),
+                    SizedBox(height: 10),
+                    Text('$progress / $totalIngredients'),
+                  ],
+                );
+              },
+            ),
           ],
         ),
       ),

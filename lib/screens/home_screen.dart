@@ -8,6 +8,7 @@ import 'package:food_allergy_scanner/providers/allergy_provider.dart';
 import 'package:food_allergy_scanner/screens/manage_allergies_screen.dart';
 import 'package:food_allergy_scanner/screens/matching_allergens_screen.dart';
 import 'package:food_allergy_scanner/services/merriam_webster_service.dart';
+import 'package:food_allergy_scanner/widgets/processing_dialog_widget.dart'; 
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -15,6 +16,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+
+  bool _isProcessingImage = true;
+
   String removePunctuation(String text) {
     return text.replaceAll(RegExp(r'[^\w\s-]'), '');
   }
@@ -111,8 +115,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (image == null) {
       // User canceled the picker
+
+      setState(() {
+      _isProcessingImage = false; // Stop processing
+      });
+      Navigator.of(context).pop(); // Close ProcessingDialog
+
       return;
     }
+
+    // Show ProcessingDialog
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => ProcessingDialog(),
+    );
+    setState(() {
+      _isProcessingImage = true; // Start processing
+    });
 
     final InputImage inputImage = InputImage.fromFilePath(image.path);
     final textRecognizer = TextRecognizer();
@@ -121,7 +142,14 @@ class _HomeScreenState extends State<HomeScreen> {
     // Print out all the ingredients that were scanned
     print('Scanned Ingredients: ${recognizedText.text}');
 
-    // Create a StreamController for progress updates
+    // Close ProcessingDialog
+
+    Navigator.of(context).pop();
+    setState(() {
+      _isProcessingImage = false; // Stop processing
+    });
+
+    // Show LoadingDialog for validation
     final progressStream = StreamController<int>();
 
     // Prepare the list of words and handle replacements
