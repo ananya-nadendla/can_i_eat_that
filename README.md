@@ -4,19 +4,23 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
+### [0.7.2] - 2024-07-24
+- BUG FIX 
+    1) Invalid words (aka. scanned ingredients not found in dictionary) show in Matching Allergens Screen
+        - (note: ) occurs when warning that between 90 and 100 words were shown
+    2) '&' does not count as punctuation in removePunctuation, is permissible (in the case of words like fd&c)
+
+- TO DO:
+    1) Replace abbreviations with actual words when matching? (Aka replace "vit" with "Vitamin)?
+    2) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
+    3) Adjustable Camera Viewfinder when taking photo 
+    4) UI Design
+    5) Deal with frames skipping warning
+
 
 ### [0.7.0] - 2024-07-24
 - MINOR FEATURE
     - Another loading spinner (processing_dialog_widget.dart) signifying ingredients being scanned (before validation loading_dialog_widget.dart)
-
-- TO DO:
-    1) Make a loading bar for  (3) Matching Ingredients-Allergens
-    2) Replace abbreviations with actual words when matching? (Aka replace "vit" with "Vitamin)?
-    3) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
-    4) Adjustable Camera Viewfinder when taking photo 
-    5) UI Design
-    6) Deal with frames skipping warning
-
 
 ### [0.6.6] - 2024-07-23
 - BUG FIX

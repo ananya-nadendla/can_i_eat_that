@@ -1,36 +1,72 @@
 import 'package:flutter/material.dart';
 
 class MatchingAllergensScreen extends StatelessWidget {
-  final List<String> matchingAllergens; // List of matching allergens received as input
+  final List<String> matchingAllergens; // List of matching allergens
+  final List<String> invalidAllergens; // List of invalid allergens
 
-  MatchingAllergensScreen({required this.matchingAllergens}); // Constructor to initialize with matching allergens
+  MatchingAllergensScreen({
+    required this.matchingAllergens,
+    required this.invalidAllergens,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Matching Allergens'), // AppBar title
+        title: Text('Matching Allergens'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(8.0), // Padding around the SingleChildScrollView
-        child: SingleChildScrollView( // Widget to make the content scrollable
-          child: Column( // Column to vertically align list of matching allergens
-            children: matchingAllergens.map((allergen) {
-              return ListTile( // ListTile for each matching allergen
-                leading: Icon(Icons.warning, color: Colors.red), // Red warning icon before the allergen
-                title: Text(_capitalizeFirstLetter(allergen)), // Display the name of the allergen
-              );
-            }).toList(), // Convert the mapped list into a list of widgets
+        padding: const EdgeInsets.all(8.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (matchingAllergens.isNotEmpty)
+                ...[
+                  Center(
+                    child: Text(
+                      'Matching Allergens:',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Column(
+                    children: matchingAllergens.map((allergen) {
+                      return ListTile(
+                        leading: Icon(Icons.warning, color: Colors.red),
+                        title: Text(_capitalizeFirstLetter(allergen)),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              if (invalidAllergens.isNotEmpty)
+                ...[
+                  SizedBox(height: 20),
+                  Center(
+                    child: Text(
+                      'Unrecognized Ingredients:',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Column(
+                    children: invalidAllergens.map((ingredient) {
+                      return ListTile(
+                        leading: Icon(Icons.help, color: Colors.orange), // Blue question mark icon
+                        title: Text(_capitalizeFirstLetter(ingredient)),
+                      );
+                    }).toList(),
+                  ),
+                ],
+            ],
           ),
         ),
       ),
     );
   }
-}
 
-
-//For readable formatting on frontend
   String _capitalizeFirstLetter(String text) {
     if (text.isEmpty) return '';
     return text.toLowerCase().split(' ').map((word) => word[0].toUpperCase() + word.substring(1)).join(' ');
   }
+}
