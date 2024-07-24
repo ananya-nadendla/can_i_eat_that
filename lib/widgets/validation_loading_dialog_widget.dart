@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-class LoadingDialog extends StatelessWidget {
+class ValidationLoadingDialog extends StatelessWidget {
   final int totalIngredients;
   final Stream<int> progressStream;
 
-  LoadingDialog({required this.totalIngredients, required this.progressStream});
+  ValidationLoadingDialog({required this.totalIngredients, required this.progressStream});
 
   @override
   Widget build(BuildContext context) {

@@ -4,11 +4,13 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
-### [0.7.2] - 2024-07-24
+### [0.7.4] - 2024-07-24
 - BUG FIX 
     1) Invalid words (aka. scanned ingredients not found in dictionary) show in Matching Allergens Screen
         - (note: ) occurs when warning that between 90 and 100 words were shown
     2) '&' does not count as punctuation in removePunctuation, is permissible (in the case of words like fd&c)
+    3) Renamed widget files better (LoadingDialog to ValidationLoadingDialog)
+    4) Removed duplicate ValidationLoadingDialog in home_screen and instead imported widgets/validation_loading_dialog
 
 - TO DO:
     1) Replace abbreviations with actual words when matching? (Aka replace "vit" with "Vitamin)?

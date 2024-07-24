@@ -4,11 +4,14 @@ import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:pluralize/pluralize.dart';
+
 import 'package:food_allergy_scanner/providers/allergy_provider.dart';
 import 'package:food_allergy_scanner/screens/manage_allergies_screen.dart';
 import 'package:food_allergy_scanner/screens/matching_allergens_screen.dart';
 import 'package:food_allergy_scanner/services/merriam_webster_service.dart';
 import 'package:food_allergy_scanner/widgets/processing_dialog_widget.dart'; 
+import 'package:food_allergy_scanner/widgets/validation_loading_dialog_widget.dart'; // Import the widget file
+
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -149,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _isProcessingImage = false; // Stop processing
   });
 
-  // Show LoadingDialog for validation
+  // Show ValidationLoadingDialog for validation
   final progressStream = StreamController<int>();
 
   // Prepare the list of words and handle replacements
@@ -174,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
     context: context,
     barrierDismissible: false,
     builder: (context) {
-      return LoadingDialog(
+      return ValidationLoadingDialog(
         totalIngredients: totalCount,
         progressStream: progressStream.stream,
       );
@@ -273,7 +276,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Some ingredients were unrecognizable due to unclear photo / typos. Discretion is advised.',
+                        'Some ingredients were not recognized due to typos or an unclear photo. Visit "See Details" for more information.',
                         style: TextStyle(color: Colors.orange),
                         textAlign: TextAlign.center,
                       ),
@@ -358,48 +361,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
-class LoadingDialog extends StatelessWidget {
-  final int totalIngredients;
-  final Stream<int> progressStream;
-
-  LoadingDialog({required this.totalIngredients, required this.progressStream});
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Validating Ingredients',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            StreamBuilder<int>(
-              stream: progressStream,
-              initialData: 0,
-              builder: (context, snapshot) {
-                int progress = snapshot.data!;
-                return Column(
-                  children: [
-                    LinearProgressIndicator(value: progress / totalIngredients),
-                    SizedBox(height: 10),
-                    Text('$progress / $totalIngredients'),
-                  ],
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-String _capitalizeFirstLetter(String text) {
-    if (text.isEmpty) return '';
-    return text.toLowerCase().split(' ').map((word) => word[0].toUpperCase() + word.substring(1)).join(' ');
-  }
