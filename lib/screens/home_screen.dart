@@ -38,83 +38,98 @@ class _HomeScreenState extends State<HomeScreen> {
         .replaceAll(RegExp(r'[ß]', caseSensitive: false), 'ss');
   }
 
-  Future<Map<String, dynamic>> validateIngredients(
-    BuildContext context,
-    String text,
-    StreamController<int> progressStream,
-    int totalCount,
-  ) async {
-    final merriamWebsterService = MerriamWebsterService();
-    final allergyProvider = Provider.of<AllergyProvider>(context, listen: false);
-    final predefinedValidWords = allergyProvider.predefinedValidWords;
-    bool isValidIngredients = true;
-    int validCount = 0;
-    int checkedCount = 0;
+ Future<Map<String, dynamic>> validateIngredients(
+  BuildContext context,
+  String text,
+  StreamController<int> progressStream,
+  int totalCount,
+) async {
+  final merriamWebsterService = MerriamWebsterService();
+  final allergyProvider = Provider.of<AllergyProvider>(context, listen: false);
+  final predefinedValidWords = allergyProvider.predefinedValidWords;
+  bool isValidIngredients = true;
+  int validCount = 0;
+  int checkedCount = 0;
 
-    List<String> invalidIngredients = [];  
+  List<String> invalidIngredients = [];  
 
-    List<String> words = text.split(RegExp(r'[\s,.;!?()]+'));
-    words = words.where((word) => word.isNotEmpty).toList(); // Remove empty words
-    List<String> toValidate = [];
+  List<String> words = text.split(RegExp(r'[\s,.;!?()\[\]]+'));
+  words = words.where((word) => word.isNotEmpty).toList(); // Remove empty words
+  List<String> toValidate = [];
 
-    for (String word in words) {
-      String normalizedWord = normalizeAccents(word);
-      String cleanedWord = removePunctuation(normalizedWord.trim());
+  List<String> ingredients = text.split(RegExp(r'\s*[\(\)\[\],.!?]+\s*'));
+  Map<String, List<String>> ingredientWordsMap = {}; // Map to keep track of which words belong to which ingredient
 
-      if (cleanedWord.isNotEmpty) {
-        if (RegExp(r'\d').hasMatch(cleanedWord)) {
-          print('Skipping word with digits: $cleanedWord'); // i.e. "B3" in Vitamin B3
-          continue;
-        }
+  for (String ingredient in ingredients) {
+    String normalizedIngredient = normalizeAccents(ingredient);
+    ingredientWordsMap[ingredient] = normalizedIngredient.split(RegExp(r'[\s,]+')).map((word) => word.trim()).toList();
+  }
 
-        if (predefinedValidWords.contains(cleanedWord.toLowerCase())) {
-          validCount++;
-          checkedCount++;
-          print('Skipping - PREDEFINED VALID ($validCount): $cleanedWord');
-          progressStream.add(checkedCount); // Update progress for each checked word
-          continue;
-        } else {
-          toValidate.add(cleanedWord);
-        }
+  for (String word in words) {
+    String normalizedWord = normalizeAccents(word);
+    String cleanedWord = removePunctuation(normalizedWord.trim());
+
+    if (cleanedWord.isNotEmpty) {
+      if (RegExp(r'\d').hasMatch(cleanedWord)) {
+        print('Skipping word with digits: $cleanedWord'); // i.e. "B3" in Vitamin B3
+        continue;
+      }
+
+      if (predefinedValidWords.contains(cleanedWord.toLowerCase())) {
+        validCount++;
+        checkedCount++;
+        print('Skipping - PREDEFINED VALID ($validCount): $cleanedWord');
+        progressStream.add(checkedCount); // Update progress for each checked word
+        continue;
+      } else {
+        toValidate.add(cleanedWord);
       }
     }
-
-    // Perform API validation in parallel
-    List<Future<void>> validationFutures = toValidate.map((word) async {
-      checkedCount++;
-      print('Validating word ($checkedCount): $word');
-      bool isValid = await merriamWebsterService.isValidWord(word.toLowerCase());
-
-      if (isValid) {
-        validCount++;
-        print("WORD VALID!! ($validCount): $word");
-        
-      } else {
-        print('Word not found in dictionary: $word');
-        invalidIngredients.add(word);
-        List<String> suggestions = await merriamWebsterService.getSuggestions(word.toLowerCase());
-        if (suggestions.isNotEmpty) {
-          print('Suggestions for "$word": ${suggestions.join(', ')}');
-        } else {
-          print('No suggestions found for "$word".');
-        }
-        isValidIngredients = false;
-      }
-      progressStream.add(checkedCount); // Update progress for each checked word
-    }).toList();
-
-    // Wait for all validations to complete
-    await Future.wait(validationFutures);
-    double validityPercentage = (validCount / totalCount) * 100;
-    print('Valid Count: $validCount, TotalCount: $totalCount'); // Check the correct total count
-    print('Validity Percentage: $validityPercentage%');
-
-    return {
-      'isValidIngredients': isValidIngredients,
-      'validityPercentage': validityPercentage,
-      'invalidIngredients': invalidIngredients
-    };
   }
+
+  // Perform API validation in parallel
+  List<Future<void>> validationFutures = toValidate.map((word) async {
+    checkedCount++;
+    print('Validating word ($checkedCount): $word');
+    bool isValid = await merriamWebsterService.isValidWord(word.toLowerCase());
+
+    if (isValid) {
+      validCount++;
+      print("WORD VALID!! ($validCount): $word");
+    } else {
+      print('Word not found in dictionary: $word');
+      isValidIngredients = false;
+      
+      // Mark the entire ingredient as invalid
+      String? ingredient;
+      try {
+        ingredient = ingredientWordsMap.entries.firstWhere((entry) => entry.value.contains(word)).key;
+      } catch (e) {
+        // Handle the case where the word is not found
+        ingredient = null;
+      }
+
+      if (ingredient != null && !invalidIngredients.contains(ingredient)) {
+        invalidIngredients.add(ingredient);
+      }
+
+     
+    }
+    progressStream.add(checkedCount); // Update progress for each checked word
+  }).toList();
+
+  // Wait for all validations to complete
+  await Future.wait(validationFutures);
+  double validityPercentage = (validCount / totalCount) * 100;
+  print('Valid Count: $validCount, TotalCount: $totalCount'); // Check the correct total count
+  print('Validity Percentage: $validityPercentage%');
+
+  return {
+    'isValidIngredients': isValidIngredients,
+    'validityPercentage': validityPercentage,
+    'invalidIngredients': invalidIngredients
+  };
+}
 
  Future<void> scanProduct(BuildContext context) async {
   final ImagePicker picker = ImagePicker();
@@ -152,11 +167,14 @@ class _HomeScreenState extends State<HomeScreen> {
     _isProcessingImage = false; // Stop processing
   });
 
+   // Combine split lines into single ingredients
+  String combinedText = recognizedText.text.replaceAll(RegExp(r'\n'), ' ');
+  print ("!! Combined Text: $combinedText");
   // Show ValidationLoadingDialog for validation
   final progressStream = StreamController<int>();
 
   // Prepare the list of words and handle replacements
-  List<String> words = recognizedText.text.split(RegExp(r'[\s,.;!?()]+'));
+  List<String> words = combinedText.split(RegExp(r'[\s,.;!?()]+'));
   int totalCount = 0;
 
   for (String word in words) {
@@ -184,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
     },
   );
 
-  final validationResult = await validateIngredients(context, recognizedText.text, progressStream, totalCount);
+  final validationResult = await validateIngredients(context, combinedText, progressStream, totalCount);
   bool isValidIngredients = validationResult['isValidIngredients'];
   double validityPercentage = validationResult['validityPercentage'];
   List<String> invalidAllergens = validationResult['invalidIngredients'];
@@ -226,7 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<String> matchingAllergens = [];
   bool isSafe = true;
 
-  if (recognizedText.text.isNotEmpty) {
+  if (combinedText.isNotEmpty) {
     for (String allergy in allergies) {
       String singular = Pluralize().singular(allergy);
       String plural = Pluralize().plural(allergy);
@@ -235,7 +253,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       print('Checking: Singular: $singular, Plural: $plural');
 
-      if (regexSingular.hasMatch(recognizedText.text) || regexPlural.hasMatch(recognizedText.text)) {
+      if (regexSingular.hasMatch(combinedText) || regexPlural.hasMatch(combinedText)) {
         print('MATCH FOUND: "$allergy"');
         isSafe = false;
         matchingAllergens.add(allergy);
@@ -255,7 +273,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Center(
             child: Text(
-              recognizedText.text.isNotEmpty
+              combinedText.isNotEmpty
                   ? (isSafe ? 'The product is safe to eat!' : 'The product contains allergens!')
                   : 'No text was recognized!',
             ),
@@ -285,7 +303,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-          if (!isSafe && recognizedText.text.isNotEmpty)
+          if (!isSafe && combinedText.isNotEmpty)
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
@@ -312,6 +330,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
   );
 }
+
 
   void manageAllergies(BuildContext context) {
     Navigator.push(
