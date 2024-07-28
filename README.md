@@ -4,11 +4,12 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
-### [0.7.6] - 2024-07-28
+### [0.7.7] - 2024-07-28
 - BUG FIX
-    1) Newline characters replaced w/ single space in ingredients list 
-    2) Whole invalid ingredient is shown in Matching Allergens Screen (not just invalid word) 
-
+    1) Safe ingredient is shown in Matching Allergens Screen 
+    2) Newline characters replaced w/ single space in ingredients list 
+    3) Whole invalid ingredient is shown in Matching Allergens Screen (not just invalid word)
+ 
 - TO DO:
     1) Replace abbreviations with actual words when matching? (Aka replace "vit" with "Vitamin)?
     2) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)

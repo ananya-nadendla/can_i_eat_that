@@ -131,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
   };
 }
 
- Future<void> scanProduct(BuildContext context) async {
+Future<void> scanProduct(BuildContext context) async {
   final ImagePicker picker = ImagePicker();
   final XFile? image = await picker.pickImage(source: ImageSource.camera);
 
@@ -167,9 +167,10 @@ class _HomeScreenState extends State<HomeScreen> {
     _isProcessingImage = false; // Stop processing
   });
 
-   // Combine split lines into single ingredients
+  // Combine split lines into single ingredients
   String combinedText = recognizedText.text.replaceAll(RegExp(r'\n'), ' ');
-  print ("!! Combined Text: $combinedText");
+  print("!! Combined Text: $combinedText");
+
   // Show ValidationLoadingDialog for validation
   final progressStream = StreamController<int>();
 
@@ -242,6 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
   AllergyProvider allergyProvider = Provider.of<AllergyProvider>(context, listen: false);
   List<String> allergies = allergyProvider.allergies;
   List<String> matchingAllergens = [];
+  List<String> safeIngredients = []; // Add this line
   bool isSafe = true;
 
   if (combinedText.isNotEmpty) {
@@ -259,9 +261,44 @@ class _HomeScreenState extends State<HomeScreen> {
         matchingAllergens.add(allergy);
       }
     }
+
+    // Populate safeIngredients with the ingredients that do not match allergens
+    List<String> ingredients = combinedText.split(RegExp(r'\s*[\(\)\[\],.!?]+\s*'));
+    for (String ingredient in ingredients) {
+      String cleanedIngredient = ingredient.trim();
+
+      // Exclude words with percentages and empty words
+      if (cleanedIngredient.isNotEmpty && !RegExp(r'\d+%').hasMatch(cleanedIngredient)) {
+        bool matchesAllergy = false;
+        for (String allergy in allergies) {
+          String singular = Pluralize().singular(allergy);
+          String plural = Pluralize().plural(allergy);
+          RegExp regexSingular = RegExp(r"\b" + RegExp.escape(singular) + r"\b", caseSensitive: false);
+          RegExp regexPlural = RegExp(r"\b" + RegExp.escape(plural) + r"\b", caseSensitive: false);
+
+          if (regexSingular.hasMatch(cleanedIngredient) || regexPlural.hasMatch(cleanedIngredient)) {
+            matchesAllergy = true;
+            break;
+          }
+        }
+        if (!matchesAllergy) {
+          safeIngredients.add(cleanedIngredient);
+        }
+      }
+    }
   } else {
     isSafe = false;
   }
+
+  //Debugging array contents
+  print('Matching Allergens: ${matchingAllergens.length}');
+  print(matchingAllergens);
+
+  print('Invalid Allergens: ${invalidAllergens.length}');
+  print(invalidAllergens);
+
+  print('Safe Ingredients: ${safeIngredients.length}');
+  print(safeIngredients);
 
   textRecognizer.close();
   showDialog(
@@ -313,6 +350,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     builder: (context) => MatchingAllergensScreen(
                       matchingAllergens: matchingAllergens,
                       invalidAllergens: invalidAllergens,
+                      safeIngredients: safeIngredients, // Pass safeIngredients here
                     ),
                   ),
                 );

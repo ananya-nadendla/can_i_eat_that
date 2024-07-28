@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
-
 class MatchingAllergensScreen extends StatelessWidget {
   final List<String> matchingAllergens; // List of matching allergens
   final List<String> invalidAllergens; // List of invalid allergens
+  final List<String> safeIngredients; // List of safe ingredients
 
   MatchingAllergensScreen({
     required this.matchingAllergens,
     required this.invalidAllergens,
+    required this.safeIngredients,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Matching Allergens'),
+        title: Text('Results'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -25,7 +26,7 @@ class MatchingAllergensScreen extends StatelessWidget {
                 ...[
                   Center(
                     child: Text(
-                      'Matching Allergens:',
+                      'Unsafe Ingredients:',
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                     ),
                   ),
@@ -53,6 +54,25 @@ class MatchingAllergensScreen extends StatelessWidget {
                     children: invalidAllergens.map((ingredient) {
                       return ListTile(
                         leading: Icon(Icons.help, color: Colors.orange), // Blue question mark icon
+                        title: Text(_capitalizeFirstLetter(ingredient)),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              if (safeIngredients.isNotEmpty)
+                ...[
+                  SizedBox(height: 20),
+                  Center(
+                    child: Text(
+                      'Safe Ingredients:',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Column(
+                    children: safeIngredients.map((ingredient) {
+                      return ListTile(
+                        leading: Icon(Icons.check_circle, color: Colors.green),
                         title: Text(_capitalizeFirstLetter(ingredient)),
                       );
                     }).toList(),
