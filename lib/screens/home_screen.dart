@@ -169,6 +169,13 @@ Future<void> scanProduct(BuildContext context) async {
 
   // Combine split lines into single ingredients
   String combinedText = recognizedText.text.replaceAll(RegExp(r'\n'), ' ');
+  
+  // Remove "Ingredient" and "Ingredients" from list
+  combinedText = combinedText.replaceAll(RegExp(r'\bIngredient\b', caseSensitive: false), '');
+  combinedText = combinedText.replaceAll(RegExp(r'\bIngredients\b', caseSensitive: false), '');
+  // Optionally, remove extra spaces that may result from the replacements
+  combinedText = combinedText.replaceAll(RegExp(r'\s+'), ' ').trim();
+
   print("!! Combined Text: $combinedText");
 
   // Show ValidationLoadingDialog for validation
@@ -281,7 +288,7 @@ Future<void> scanProduct(BuildContext context) async {
             break;
           }
         }
-        if (!matchesAllergy) {
+        if (!matchesAllergy && !invalidAllergens.contains(cleanedIngredient)) {
           safeIngredients.add(cleanedIngredient);
         }
       }
