@@ -347,7 +347,7 @@ Future<void> scanProduct(BuildContext context) async {
                 ),
               ),
             ),
-          if (!isSafe && combinedText.isNotEmpty)
+          if (/*!isSafe &&*/ combinedText.isNotEmpty)
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();

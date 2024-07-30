@@ -4,17 +4,19 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
-### [0.7.8] - 2024-07-30
+### [0.7.10] - 2024-07-30
 - BUG FIX
     1) Fixed - invalid ingredients aren't part of the safe ingredient list anymore
+    2) Removed the words "ingredient(s)" from printing on the Results page as an ingredient itself
+    3) "See Details" now shows even if there are no matching allergens
 
 - TO DO:
-    1) Replace abbreviations with actual words when matching? (Aka replace "vit" with "Vitamin)?
-    2) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
-    3) Adjustable Camera Viewfinder when taking photo 
-    4) UI Design
-    5) Deal with frames skipping warning
-    6) Move common methods to a utils.dart
+    1) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
+    2) Adjustable Camera Viewfinder when taking photo 
+    3) UI Design
+    4) Deal with frames skipping warning
+    5) Move common methods to a utils.dart
+    6) BUG - User cancels picker, screen turns black
 
 
 ### [0.7.7] - 2024-07-28
