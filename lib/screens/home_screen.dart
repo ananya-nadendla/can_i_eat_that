@@ -140,7 +140,7 @@ Future<void> scanProduct(BuildContext context) async {
     setState(() {
       _isProcessingImage = false; // Stop processing
     });
-    Navigator.of(context).pop(); // Close ProcessingDialog
+    //Navigator.of(context).pop(); // Close ProcessingDialog
     return;
   }
 
@@ -347,7 +347,7 @@ Future<void> scanProduct(BuildContext context) async {
                 ),
               ),
             ),
-          if (/*!isSafe &&*/ combinedText.isNotEmpty)
+          if (/*!isSafe &&*/ combinedText.isNotEmpty) //See Details shows for safe / unsafe products
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
