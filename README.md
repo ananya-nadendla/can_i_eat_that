@@ -181,8 +181,8 @@ This project uses an environment file (`.env`) to store API Keys for security pu
 
 2.  **Sign Up For Merriam-Webster API**
 
-    Sign Up Link: https://dictionaryapi.com/register/index
-    - For or "Request API Key (1)", choose "Collegiate Dictionary" from dropdown
+    Sign Up Link: https://dictionaryapi.com/register/index **(its free!)**
+    - For "Request API Key (1)", choose "Collegiate Dictionary" from dropdown
     - For "Request API Key (2)", choose "Medical Dictionary" from dropdown
 
 
