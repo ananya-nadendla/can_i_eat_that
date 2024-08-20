@@ -4,8 +4,6 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
--- CURRENT BUG: User cancels image cropper, [image processing continues oh no]
-
 ### [0.8.1] - 2024-08-20
 - MINOR FEATURE
     1) Image cropping feature after user captures photo 
