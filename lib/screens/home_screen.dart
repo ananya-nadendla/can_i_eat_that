@@ -221,9 +221,13 @@ Future<void> scanProduct(BuildContext context) async {
   // Combine split lines into single ingredients
   String combinedText = recognizedText.text.replaceAll(RegExp(r'\n'), ' ');
   
-  // Remove "Ingredient" and "Ingredients" from list
+  // Remove Keywords: "Ingredient", "Ingredients", "Contains", "May Contain"
   combinedText = combinedText.replaceAll(RegExp(r'\bIngredient\b', caseSensitive: false), '');
   combinedText = combinedText.replaceAll(RegExp(r'\bIngredients\b', caseSensitive: false), '');
+  combinedText = combinedText.replaceAll(RegExp(r'\bMay\s+contain\b', caseSensitive: false), ''); //multiword
+  combinedText = combinedText.replaceAll(RegExp(r'\bContains\b', caseSensitive: false), '');
+  combinedText = combinedText.replaceAll(RegExp(r'\bContain\b', caseSensitive: false), '');
+  
   // Optionally, remove extra spaces that may result from the replacements
   combinedText = combinedText.replaceAll(RegExp(r'\s+'), ' ').trim();
 
@@ -321,7 +325,9 @@ Future<void> scanProduct(BuildContext context) async {
     }
 
     // Populate safeIngredients with the ingredients that do not match allergens
-    List<String> ingredients = combinedText.split(RegExp(r'\s*[\(\)\[\],.!?]+\s*'));
+    // OLD - List<String> ingredients = combinedText.split(RegExp(r'\s*[\(\)\[\],.!?]+\s*'));
+    List<String> ingredients = combinedText.split(RegExp(r'\s*(?:\band\b|\bor\b|[\(\)\[\],.!?:])\s*')); //v0.8.3 update - split with COLON, AND, or OR
+
     for (String ingredient in ingredients) {
       String cleanedIngredient = ingredient.trim();
 

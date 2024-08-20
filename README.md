@@ -4,7 +4,22 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
--- CURRENT BUG: User cancels image cropper, [image processing continues oh no]
+### [0.8.3] - 2024-08-20       
+- BUG FIX
+    1) Removed Keywords (from ingredients list)
+        - Already Implemented: "Ingredient", "Ingredients"
+        - Added: "Contains", "Or Less Of", "May contain"
+    2) Ingredient Splitters - Added more (splitters are removed from ingred. list)
+        - Colons 
+        - "And"
+        - "Or"
+
+- TO DO:
+    1) (Potential Idea) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
+    2) (Potential Idea) Adjustable Camera Viewfinder when taking photo 
+    3) UI Design
+    4) Deal with frames skipping warning
+    5) Move common methods to a utils.dart
 
 ### [0.8.1] - 2024-08-20
 - MINOR FEATURE
@@ -13,15 +28,6 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
         
 - BUG FIX
     1) User is sent to home screen if they cancel image cropping feature
-
-- TO DO:
-    1) (Potential Idea) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
-    2) (Potential Idea) Adjustable Camera Viewfinder when taking photo 
-    3) (Potential Idea) Deal with Keywords (like "Ingredients")
-        - Keywords: "Contains", "Or Less Of", "May contain"
-    3) UI Design
-    4) Deal with frames skipping warning
-    5) Move common methods to a utils.dart
 
 ### [0.7.11] - 2024-07-30
 - BUG FIX
@@ -183,8 +189,8 @@ This project uses an environment file (`.env`) to store API Keys for security pu
 
 2.  **Sign Up For Merriam-Webster API**
 
-    Sign Up Link: https://dictionaryapi.com/register/index
-    - For or "Request API Key (1)", choose "Collegiate Dictionary" from dropdown
+    Sign Up Link: https://dictionaryapi.com/register/index **(its free!)**
+    - For "Request API Key (1)", choose "Collegiate Dictionary" from dropdown
     - For "Request API Key (2)", choose "Medical Dictionary" from dropdown
 
 
@@ -198,4 +204,3 @@ This project uses an environment file (`.env`) to store API Keys for security pu
 
    # Your Merriam-Webster Medical API Key
    API_KEY_MERRIAM_WEBSTER_MEDICAL_DICTIONARY=your_actual_medical_api_key
-
