@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:pluralize/pluralize.dart';
+import 'package:image_cropper/image_cropper.dart';
 
 import 'package:food_allergy_scanner/providers/allergy_provider.dart';
 import 'package:food_allergy_scanner/screens/manage_allergies_screen.dart';
@@ -21,6 +23,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
 
   bool _isProcessingImage = true;
+  File? _croppedFile;
 
   String removePunctuation(String text) {
     return text.replaceAll(RegExp(r'[^\w\s-&]'), '');
@@ -37,6 +40,43 @@ class _HomeScreenState extends State<HomeScreen> {
         .replaceAll(RegExp(r'[ç]', caseSensitive: false), 'c')
         .replaceAll(RegExp(r'[ß]', caseSensitive: false), 'ss');
   }
+
+  Future<bool> _cropImage(File imageFile) async {
+  final croppedFile = await ImageCropper().cropImage(
+    sourcePath: imageFile.path,
+    compressFormat: ImageCompressFormat.jpg,
+    compressQuality: 100,
+    uiSettings: [
+      AndroidUiSettings(
+        toolbarTitle: 'Cropper',
+        toolbarColor: Colors.deepOrange,
+        toolbarWidgetColor: Colors.white,
+        initAspectRatio: CropAspectRatioPreset.original,
+        lockAspectRatio: false,
+      ),
+      IOSUiSettings(
+        title: 'Cropper',
+      ),
+      WebUiSettings(
+        context: context,
+        presentStyle: WebPresentStyle.dialog,
+        size: const CropperSize(
+          width: 520,
+          height: 520,
+        ),
+      ),
+    ],
+  );
+
+  if (croppedFile != null) {
+    setState(() {
+      _croppedFile = File(croppedFile.path);
+    });
+    return true; // Cropping was successful
+  } else {
+    return false; // Cropping was canceled
+  }
+}
 
  Future<Map<String, dynamic>> validateIngredients(
   BuildContext context,
@@ -132,7 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 Future<void> scanProduct(BuildContext context) async {
-  final ImagePicker picker = ImagePicker();
+    final ImagePicker picker = ImagePicker();
   final XFile? image = await picker.pickImage(source: ImageSource.camera);
 
   if (image == null) {
@@ -140,9 +180,20 @@ Future<void> scanProduct(BuildContext context) async {
     setState(() {
       _isProcessingImage = false; // Stop processing
     });
-    //Navigator.of(context).pop(); // Close ProcessingDialog
     return;
   }
+
+  // Crop the image
+  bool isCropped = await _cropImage(File(image.path));
+
+  if (!isCropped) {
+    // User canceled cropping
+    setState(() {
+      _isProcessingImage = false; // Stop processing
+    });
+    return; // Exit scanProduct without continuing to process the image
+  }
+
 
   // Show ProcessingDialog
   showDialog(
@@ -154,7 +205,7 @@ Future<void> scanProduct(BuildContext context) async {
     _isProcessingImage = true; // Start processing
   });
 
-  final InputImage inputImage = InputImage.fromFilePath(image.path);
+  final InputImage inputImage = InputImage.fromFilePath(_croppedFile!.path);
   final textRecognizer = TextRecognizer();
   final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
 

@@ -5,6 +5,13 @@
         android:label="food_allergy_scanner"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+
+        <!--for image_cropper-->
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

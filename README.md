@@ -4,6 +4,25 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
+-- CURRENT BUG: User cancels image cropper, [image processing continues oh no]
+
+### [0.8.1] - 2024-08-20
+- MINOR FEATURE
+    1) Image cropping feature after user captures photo 
+        - (so that they only capture the text they wish)
+        
+- BUG FIX
+    1) User is sent to home screen if they cancel image cropping feature
+
+- TO DO:
+    1) (Potential Idea) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
+    2) (Potential Idea) Adjustable Camera Viewfinder when taking photo 
+    3) (Potential Idea) Deal with Keywords (like "Ingredients")
+        - Keywords: "Contains", "Or Less Of", "May contain"
+    3) UI Design
+    4) Deal with frames skipping warning
+    5) Move common methods to a utils.dart
+
 ### [0.7.11] - 2024-07-30
 - BUG FIX
     1) Fixed - invalid ingredients aren't part of the safe ingredient list anymore
@@ -11,12 +30,6 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
     3) "See Details" now shows even if there are no matching allergens
     4) Fixed - user cancels image picker, screen turns black
 
-- TO DO:
-    1) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
-    2) Adjustable Camera Viewfinder when taking photo 
-    3) UI Design
-    4) Deal with frames skipping warning
-    5) Move common methods to a utils.dart
 
 
 ### [0.7.7] - 2024-07-28
