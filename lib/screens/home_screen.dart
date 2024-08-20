@@ -93,10 +93,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<String> invalidIngredients = [];  
 
+  //Split ingredients list into words
   List<String> words = text.split(RegExp(r'[\s,.;!?()\[\]]+'));
   words = words.where((word) => word.isNotEmpty).toList(); // Remove empty words
   List<String> toValidate = [];
 
+  //Split ingredients list into ingredients (can contain multiple words)
   List<String> ingredients = text.split(RegExp(r'\s*[\(\)\[\],.!?]+\s*'));
   Map<String, List<String>> ingredientWordsMap = {}; // Map to keep track of which words belong to which ingredient
 
@@ -218,7 +220,7 @@ Future<void> scanProduct(BuildContext context) async {
     _isProcessingImage = false; // Stop processing
   });
 
-  // Combine split lines into single ingredients
+  // Remove newlines to create single continous block of text
   String combinedText = recognizedText.text.replaceAll(RegExp(r'\n'), ' ');
   
   // Remove Keywords: "Ingredient", "Ingredients", "Contains", "May Contain"
