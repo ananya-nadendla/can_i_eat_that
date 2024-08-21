@@ -4,6 +4,21 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
+### [0.8.6] - 2024-08-21
+- BUG FIX
+    1) More thorough normalization of ingredients list
+        - extracted words list from ingredients list, rather than both being extracted seperately from the scanned text
+        - above is useful for removed words (i.e "ingredients" or "and / or")
+    2) Used same [ingredient / word extraction from scanned text] logic for validateIngredients() and scanProduct()
+    3) Better formatting + comments
+
+- TO DO:
+    2) (Potential Idea) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
+    3) (Potential Idea) Adjustable Camera Viewfinder when taking photo 
+    4) UI Design
+    5) Deal with frames skipping warning
+    6) Move common methods to a utils.dart
+
 ### [0.8.3] - 2024-08-20       
 - BUG FIX
     1) Removed Keywords (from ingredients list)
