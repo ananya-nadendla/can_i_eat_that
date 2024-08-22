@@ -4,7 +4,7 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
-### [0.8.10] - 2024-08-22
+### [0.8.11] - 2024-08-22
 - BUG FIX
     1) Added utils.dart + integrated into screens files
     2) Added const modifiers
@@ -14,18 +14,20 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
             - (1) User cancels camera / cropper
             - (2) Scan Results AlertDialog
     4) Formatted all lib files
+    5) Consolidated redundant methods in allergy_provider + integrated updates into manageAllergies
 
 - NOTES
     1) User enters mispelled allergen + same mispelled allergen is scanned --> Allergen goes under both "Unsafe" and "Unrecognized"
 
 - TO DO:
-    1) Duplicates - Handle duplicate scanned ingredients & consolidate into 1 ingredient (i.e "Milk, Milk" becomes "Milk")
-    2) (Potential Idea) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
-    3) (Potential Idea) Adjustable Camera Viewfinder on live camera when taking photo 
-    4) UI Design
-    5) Deal with frames skipping warning
-    6) (IMPORTANT) Check if dimension values are dynamic
-    7) Deal w/ unused variables (HomeScreen: isValidIngredients)
+    1) (IMPORTANT) Check if dimension values are dynamic
+    2) Duplicates - Handle duplicate scanned ingredients & consolidate into 1 ingredient (i.e "Milk, Milk" becomes "Milk")
+    3) Deal with frames skipping warning
+    4) Deal w/ unused variables (HomeScreen: isValidIngredients)
+    5) Batch word validation
+    6) UI Design
+    7) (Potential Idea) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
+    8) (Potential Idea) Adjustable Camera Viewfinder on live camera when taking photo 
 
 ### [0.8.6] - 2024-08-21
 - BUG FIX

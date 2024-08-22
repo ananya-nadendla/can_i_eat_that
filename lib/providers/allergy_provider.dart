@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AllergyProvider extends ChangeNotifier {
+  // List to store user-selected allergies
   List<String> _allergies = [];
+
+  // Predefined valid words for allergy checking
   final List<String> predefinedValidWords = ['vit', 'fd&c', 'd&c'];
 
+  // Lists of allergens by type
   final List<String> _treeNuts = [
     'Almond',
     'Brazil Nut',
@@ -48,7 +52,6 @@ class AllergyProvider extends ChangeNotifier {
     'Trout',
     'Tuna'
   ];
-
   final List<String> _legumes = [
     'Peanut',
     'Chickpea',
@@ -58,16 +61,19 @@ class AllergyProvider extends ChangeNotifier {
     'Soybeans'
   ];
 
+  // Getters for the allergen lists
   List<String> get allergies => _allergies;
   List<String> get treeNuts => _treeNuts;
   List<String> get crustaceanShellfish => _crustaceanShellfish;
   List<String> get fish => _fish;
   List<String> get legumes => _legumes;
 
+  // Constructor that loads saved allergies from SharedPreferences
   AllergyProvider() {
     _loadAllergies();
   }
 
+  // Add allergy to the list (if it's not already present)
   void addAllergy(String allergy) {
     if (!_allergies.contains(allergy)) {
       _allergies.add(allergy);
@@ -76,6 +82,7 @@ class AllergyProvider extends ChangeNotifier {
     }
   }
 
+  // Remove allergy from the list (if it exists)
   void removeAllergy(String allergy) {
     if (_allergies.contains(allergy)) {
       _allergies.remove(allergy);
@@ -84,95 +91,39 @@ class AllergyProvider extends ChangeNotifier {
     }
   }
 
-  void removeTreeNut(String treeNut) {
-    if (_allergies.contains(treeNut)) {
-      _allergies.remove(treeNut);
-      _saveAllergies();
-      notifyListeners();
-    }
-  }
-
-  void removeShellfish(String shellfish) {
-    if (_allergies.contains(shellfish)) {
-      _allergies.remove(shellfish);
-      _saveAllergies();
-      notifyListeners();
-    }
-  }
-
-  void removeFish(String fish) {
-    if (_allergies.contains(fish)) {
-      _allergies.remove(fish);
-      _saveAllergies();
-      notifyListeners();
-    }
-  }
-
-  void removeLegumes(String legume) {
-    if (_allergies.contains(legume)) {
-      _allergies.remove(legume);
-      _saveAllergies();
-      notifyListeners();
-    }
-  }
-
+  // Clear all allergies from list
   void clearAllergies() {
     _allergies.clear();
     _saveAllergies();
     notifyListeners();
   }
 
-  void removeTreeNutsAndCorrespondingNuts() {
-    if (_allergies.contains('Tree Nuts')) {
-      _allergies.remove('Tree Nuts');
-      for (String treeNut in treeNuts) {
-        _allergies.remove(treeNut);
+  // Remove group allergy and its related allergens from the list
+  void removeAllergensOfType(String type, List<String> allergens) {
+    if (_allergies.contains(type)) {
+      _allergies.remove(type);
+      for (String allergen in allergens) {
+        _allergies.remove(allergen);
       }
       _saveAllergies();
       notifyListeners();
     }
   }
 
-  void removeCrustaceanShellfishAndCorrespondingShellfish() {
-    if (_allergies.contains('Crustacean Shellfish')) {
-      _allergies.remove('Crustacean Shellfish');
-      for (String shellfish in crustaceanShellfish) {
-        _allergies.remove(shellfish);
-      }
-      _saveAllergies();
-      notifyListeners();
-    }
-  }
+  // Convenience methods to remove allergens by type
+  void removeTreeNuts() => removeAllergensOfType('Tree Nuts', treeNuts);
+  void removeCrustaceanShellfish() => removeAllergensOfType('Crustacean Shellfish', crustaceanShellfish);
+  void removeFish() => removeAllergensOfType('Fish', fish);
+  void removeLegumes() => removeAllergensOfType('Legumes', legumes);
 
-  void removeFishAndCorrespondingFish() {
-    if (_allergies.contains('Fish')) {
-      _allergies.remove('Fish');
-      for (String fish in this.fish) {
-        _allergies.remove(fish);
-      }
-      _saveAllergies();
-      notifyListeners();
-    }
-  }
-
-  void removeLegumesAndCorrespondingLegumes() {
-    if (_allergies.contains('Legumes')) {
-      _allergies.remove('Legumes');
-      for (String legume in legumes) {
-        _allergies.remove(legume);
-      }
-      _saveAllergies();
-      notifyListeners();
-    }
-  }
-
+  // Saves the current list of allergies to SharedPreferences
   Future<void> _saveAllergies() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('allergies', _allergies);
-    print(
-        'Saved allergies (${_allergies.length}): $_allergies'); //Debugging line
+    print('Saved allergies (${_allergies.length}): $_allergies'); // Debugging line
   }
 
+  // Loads the list of allergies from SharedPreferences
   Future<void> _loadAllergies() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _allergies = prefs.getStringList('allergies') ?? [];
