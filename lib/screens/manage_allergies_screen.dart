@@ -220,13 +220,13 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                                   allergyProvider.addAllergy(newAllergy); // Add the new allergen
                                   _controller.clear(); // Clear the input field
                                 } else {
-                                  showSnackBar(context, 'This allergen is already in the list');
+                                  showSnackBar(context, 'This allergen is already in the list.');
                                 }
                               } else {
-                                showSnackBar(context, 'You can add a maximum of 30 allergies');
+                                showSnackBar(context, 'You can add a maximum of 30 allergies.');
                               }
                             } else {
-                              showSnackBar(context, 'Please enter a valid allergen');
+                              showSnackBar(context, 'Please enter a valid allergen.');
                             }
                           },
                         ),
@@ -307,13 +307,13 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                                     _selectedGroupAllergen = null; // Clear selected group allergen
                                   });
                                 } else {
-                                  showSnackBar(context, 'This group allergen is already in the list');
+                                  showSnackBar(context, 'This group allergen is already in the list.');
                                 }
                               } else {
-                                showSnackBar(context, 'Adding this group allergen exceeds the maximum limit of 30 allergies');
+                                showSnackBar(context, 'Adding this group allergen exceeds the maximum limit of 30 allergies.');
                               }
                             } else {
-                              showSnackBar(context, 'Please select a group allergen');
+                              showSnackBar(context, 'Please select a group allergen.');
                             }
                           },
                         ),

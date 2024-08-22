@@ -30,7 +30,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
 
-  bool _isProcessingImage = true;
+  bool _isProcessingImage = false; //Controls CircularProgressIndicator in Widget built
   File? _croppedFile;
 
   String removeWordPunctuation(String text) {
@@ -193,28 +193,32 @@ Future<Map<String, dynamic>> validateIngredients(
   };
 }
 Future<void> scanProduct(BuildContext context) async {
-    final ImagePicker picker = ImagePicker();
+  final ImagePicker picker = ImagePicker();
   final XFile? image = await picker.pickImage(source: ImageSource.camera);
 
+  // User canceled the picker
   if (image == null) {
-    // User canceled the picker
     setState(() {
       _isProcessingImage = false; // Stop processing
     });
     return;
   }
 
+  // Set the state to show the loading indicator
+  setState(() {
+    _isProcessingImage = true;
+  });
+
   // Crop the image
   bool isCropped = await _cropImage(File(image.path));
 
+  // User canceled cropping
   if (!isCropped) {
-    // User canceled cropping
     setState(() {
       _isProcessingImage = false; // Stop processing
     });
     return; // Exit scanProduct without continuing to process the image
   }
-
 
   // Show ProcessingDialog
   showDialog(
@@ -222,9 +226,6 @@ Future<void> scanProduct(BuildContext context) async {
     barrierDismissible: false,
     builder: (context) => ProcessingDialog(),
   );
-  setState(() {
-    _isProcessingImage = true; // Start processing
-  });
 
   final InputImage inputImage = InputImage.fromFilePath(_croppedFile!.path);
   final textRecognizer = TextRecognizer();
@@ -239,46 +240,52 @@ Future<void> scanProduct(BuildContext context) async {
     _isProcessingImage = false; // Stop processing
   });
 
-  // Remove newlines to create single continous block of text
-  String combinedText = recognizedText.text.replaceAll(RegExp(r'\n'), ' ');
-  
+  //Continue showing CircularProgressIndicator for validationLoadingDialog
+  setState(() {
+    _isProcessingImage = true;
+  });
+
+  // Remove newlines + extra spaces to create single continous block of text
   // Remove Keywords: "Ingredient", "Ingredients", "Contains", "May Contain"
-  combinedText = combinedText
+  String combinedText = recognizedText.text.replaceAll(RegExp(r'\n'), ' ')
     .replaceAll(RegExp(r'\bIngredient\b', caseSensitive: false), '')
     .replaceAll(RegExp(r'\bIngredients\b', caseSensitive: false), '')
-    .replaceAll(RegExp(r'\bMay\s+contain\b', caseSensitive: false), '') //multiword
+    .replaceAll(RegExp(r'\bMay\s+contain\b', caseSensitive: false), '')
     .replaceAll(RegExp(r'\bContains\b', caseSensitive: false), '')
-    .replaceAll(RegExp(r'\bContain\b', caseSensitive: false), '');
-  
-  // Remove extra spaces that may result from the above replacements
-  combinedText = combinedText.replaceAll(RegExp(r'\s+'), ' ').trim();
+    .replaceAll(RegExp(r'\bContain\b', caseSensitive: false), '')
+    .replaceAll(RegExp(r'\s+'), ' ').trim(); // Remove extra spaces that may result from the above replacements
 
-  print("!! Combined Text: $combinedText");
+  
+print("!! Combined Text !!: $combinedText");
 
   // Show ValidationLoadingDialog for validation
   final progressStream = StreamController<int>();
 
   // Create ingredients list using the same logic as validateIngredients
   List<String> ingredients = combinedText
-    .split(RegExp(r'\s*(?:\band\b|\bor\b|[\(\)\[\],.!?:])\s*')) // Match splitting logic
+    .split(RegExp(r'\s*(?:\band\b|\bor\b|[\(\)\[\],.!?:])\s*')) //Splitting logic - v0.8.3 - Remove AND, OR, and COLON
     .map((ingredient) => ingredient.trim()) // Remove whitespace
     .where((ingredient) => ingredient.isNotEmpty) // Remove empty strings after splitting
     .toList();
 
-  print('Ingredients: $ingredients');
-  int totalCount = 0;
+   print('Ingredients: $ingredients');
 
-  //Create words list (from ingredients list) using same logic as validateIngredients
-  List<String> words;
+  int totalCount = 0; //Number of words
+
+   //Create words list (from ingredients list) using same logic as validateIngredients
+  List<String> words = [];
   for (String ingredient in ingredients) {
-    String normalizedIngredient = normalizeAccents(ingredient); //Remove special accents from ingredients
+    
+    //Remove special accents from ingredients
+    String normalizedIngredient = normalizeAccents(ingredient); 
+
     //Extract words from ingredients
     words = normalizedIngredient.split(RegExp(r'[\s,]+')).map((word) => word.trim()).toList();
     for (String word in words) {
-    String normalizedWord = normalizeAccents(word);
-    String cleanedWord = removeWordPunctuation(normalizedWord.trim());
+      String normalizedWord = normalizeAccents(word);
+      String cleanedWord = removeWordPunctuation(normalizedWord.trim());
 
-    if (cleanedWord.isNotEmpty) {
+      if (cleanedWord.isNotEmpty) {
       if (RegExp(r'\d').hasMatch(cleanedWord)) {
         print('Skipping word with digits: $cleanedWord'); // i.e. "B3" in Vitamin B3
         continue;
@@ -291,8 +298,7 @@ Future<void> scanProduct(BuildContext context) async {
 
   print("TOTAL COUNT scanProduct: $totalCount"); //Debugging purposes
 
- 
-  // Show loading dialog
+   // Show loading dialog
   showDialog(
     context: context,
     barrierDismissible: false,
@@ -312,6 +318,11 @@ Future<void> scanProduct(BuildContext context) async {
   // Close the StreamController
   progressStream.close();
   Navigator.of(context).pop(); // Close loading dialog
+
+  //Reset the processing state for validationLoadingDialog
+  setState(() {
+    _isProcessingImage = false;
+  });
 
   if (validityPercentage < 90) {
     print('Invalid ingredients scanned');
@@ -344,7 +355,7 @@ Future<void> scanProduct(BuildContext context) async {
   AllergyProvider allergyProvider = Provider.of<AllergyProvider>(context, listen: false);
   List<String> allergies = allergyProvider.allergies;
   List<String> matchingAllergens = [];
-  List<String> safeIngredients = []; // Add this line
+  List<String> safeIngredients = [];
   bool isSafe = true;
 
   if (combinedText.isNotEmpty) {
@@ -363,9 +374,6 @@ Future<void> scanProduct(BuildContext context) async {
       }
     }
 
-    // Populate safeIngredients with the ingredients that do not match allergens
-    // OLD - List<String> ingredients = combinedText.split(RegExp(r'\s*[\(\)\[\],.!?]+\s*'));
-    //List<String> ingredients = combinedText.split(RegExp(r'\s*(?:\band\b|\bor\b|[\(\)\[\],.!?:])\s*')); //v0.8.3 update - split with COLON, AND, or OR
     print('scanProduct() INGREDIENTS: $ingredients');
 
     for (String ingredient in ingredients) {
@@ -394,7 +402,7 @@ Future<void> scanProduct(BuildContext context) async {
     isSafe = false;
   }
 
-  //Debugging array contents
+  //Debugging - array contents
   print('Matching Allergens: ${matchingAllergens.length}');
   print(matchingAllergens);
 
@@ -444,7 +452,7 @@ Future<void> scanProduct(BuildContext context) async {
                 ),
               ),
             ),
-          if (/*!isSafe &&*/ combinedText.isNotEmpty) //See Details shows for safe / unsafe products
+          if (combinedText.isNotEmpty) // //See Details shows for safe / unsafe products
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
@@ -454,7 +462,7 @@ Future<void> scanProduct(BuildContext context) async {
                     builder: (context) => MatchingAllergensScreen(
                       matchingAllergens: matchingAllergens,
                       invalidAllergens: invalidAllergens,
-                      safeIngredients: safeIngredients, // Pass safeIngredients here
+                      safeIngredients: safeIngredients,
                     ),
                   ),
                 );
@@ -473,7 +481,6 @@ Future<void> scanProduct(BuildContext context) async {
   );
 }
 
-
   void manageAllergies(BuildContext context) {
     Navigator.push(
       context,
@@ -481,42 +488,46 @@ Future<void> scanProduct(BuildContext context) async {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Food Allergy Scanner'),
-      ),
-      body: Consumer<AllergyProvider>(
-        builder: (context, allergyProvider, child) {
-          bool hasAllergies = allergyProvider.allergies.isNotEmpty;
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                const Text(
-                  'Scan a product to check for allergens!',
-                  style: TextStyle(fontSize: 20),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: hasAllergies
-                      ? () => scanProduct(context)
-                      : () {
-                          showSnackBar(context, 'Please add at least one allergen before scanning.');
-                        },
-                  child: const Text('Scan Product'),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () => manageAllergies(context),
-                  child: const Text('Manage Allergies'),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text('Food Allergy Scanner'),
+    ),
+    body: Consumer<AllergyProvider>(
+      builder: (context, allergyProvider, child) {
+        bool hasAllergies = allergyProvider.allergies.isNotEmpty;
+        return Center(
+          child: _isProcessingImage
+            ? const CircularProgressIndicator() // v0.8.9 - loading indicator. Starts from image capture, Ends at Scan Results
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  const Text(
+                    'Scan a product to check for allergens!',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: hasAllergies
+                        ? () => scanProduct(context)
+                        : () {
+                            showSnackBar(context, 'Please add at least one allergen before scanning.');
+                          },
+                    child: const Text('Scan Product'),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () => manageAllergies(context),
+                    child: const Text('Manage Allergies'),
+                  ),
+                ],
+              ),
+        );
+      },
+    ),
+  );
+}
+
+
 }
