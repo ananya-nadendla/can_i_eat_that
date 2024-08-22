@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:food_allergy_scanner/utils/utils.dart';
+
+
 class MatchingAllergensScreen extends StatelessWidget {
   final List<String> matchingAllergens; // List of matching allergens
   final List<String> invalidAllergens; // List of invalid allergens
@@ -35,7 +38,7 @@ class MatchingAllergensScreen extends StatelessWidget {
                     children: matchingAllergens.map((allergen) {
                       return ListTile(
                         leading: Icon(Icons.warning, color: Colors.red),
-                        title: Text(_capitalizeFirstLetter(allergen)),
+                        title: Text(capitalizeFirstLetter(allergen)),
                       );
                     }).toList(),
                   ),
@@ -54,7 +57,7 @@ class MatchingAllergensScreen extends StatelessWidget {
                     children: invalidAllergens.map((ingredient) {
                       return ListTile(
                         leading: Icon(Icons.help, color: Colors.orange), // Blue question mark icon
-                        title: Text(_capitalizeFirstLetter(ingredient)),
+                        title: Text(capitalizeFirstLetter(ingredient)),
                       );
                     }).toList(),
                   ),
@@ -73,7 +76,7 @@ class MatchingAllergensScreen extends StatelessWidget {
                     children: safeIngredients.map((ingredient) {
                       return ListTile(
                         leading: Icon(Icons.check_circle, color: Colors.green),
-                        title: Text(_capitalizeFirstLetter(ingredient)),
+                        title: Text(capitalizeFirstLetter(ingredient)),
                       );
                     }).toList(),
                   ),
@@ -85,8 +88,5 @@ class MatchingAllergensScreen extends StatelessWidget {
     );
   }
 
-  String _capitalizeFirstLetter(String text) {
-    if (text.isEmpty) return '';
-    return text.toLowerCase().split(' ').map((word) => word[0].toUpperCase() + word.substring(1)).join(' ');
-  }
+  
 }

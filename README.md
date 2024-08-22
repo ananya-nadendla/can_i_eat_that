@@ -4,6 +4,21 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
+### [0.8.8] - 2024-08-22
+- BUG FIX
+    1) Added utils.dart + integrated into screens files
+    2) Added const modifiers
+
+- NOTES
+    1) User enters mispelled allergen + same mispelled allergen is scanned --> Allergen goes under both "Unsafe" and "Unrecognized"
+
+- TO DO:
+    2) (Potential Idea) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
+    3) (Potential Idea) Adjustable Camera Viewfinder on live camera when taking photo 
+    4) UI Design
+    5) Deal with frames skipping warning
+    6) (IMPORTANT) Check if dimension values are dynamic
+
 ### [0.8.6] - 2024-08-21
 - BUG FIX
     1) More thorough normalization of ingredients list
@@ -11,13 +26,6 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
         - above is useful for removed words (i.e "ingredients" or "and / or")
     2) Used same [ingredient / word extraction from scanned text] logic for validateIngredients() and scanProduct()
     3) Better formatting + comments
-
-- TO DO:
-    2) (Potential Idea) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
-    3) (Potential Idea) Adjustable Camera Viewfinder when taking photo 
-    4) UI Design
-    5) Deal with frames skipping warning
-    6) Move common methods to a utils.dart
 
 ### [0.8.3] - 2024-08-20       
 - BUG FIX
@@ -64,7 +72,7 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 - BUG FIX 
     1) Invalid words (aka. scanned ingredients not found in dictionary) show in Matching Allergens Screen
         - (note: ) occurs when warning that between 90 and 100 words were shown
-    2) '&' does not count as punctuation in removePunctuation, is permissible (in the case of words like fd&c)
+    2) '&' does not count as punctuation in removeWordPunctuation, is permissible (in the case of words like fd&c)
     3) Renamed widget files better (LoadingDialog to ValidationLoadingDialog)
     4) Removed duplicate ValidationLoadingDialog in home_screen and instead imported widgets/validation_loading_dialog
 

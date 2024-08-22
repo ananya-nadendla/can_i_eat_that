@@ -12,7 +12,9 @@ import 'package:food_allergy_scanner/screens/manage_allergies_screen.dart';
 import 'package:food_allergy_scanner/screens/matching_allergens_screen.dart';
 import 'package:food_allergy_scanner/services/merriam_webster_service.dart';
 import 'package:food_allergy_scanner/widgets/processing_dialog_widget.dart'; 
-import 'package:food_allergy_scanner/widgets/validation_loading_dialog_widget.dart'; // Import the widget file
+import 'package:food_allergy_scanner/widgets/validation_loading_dialog_widget.dart'; 
+import 'package:food_allergy_scanner/utils/utils.dart';
+
 
 //NOTES - v0.8.5
     //v0.8.3 issue - 'and/or' still being validated because they werent removed from words list, only ingredients
@@ -31,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isProcessingImage = true;
   File? _croppedFile;
 
-  String removePunctuation(String text) {
+  String removeWordPunctuation(String text) {
     return text.replaceAll(RegExp(r'[^\w\s-&]'), '');
   }
 
@@ -123,7 +125,7 @@ Future<Map<String, dynamic>> validateIngredients(
     ingredientWordsMap[ingredient] = words;
 
     for (String word in words) {
-      String cleanedWord = removePunctuation(word); //Remove punctuation from word
+      String cleanedWord = removeWordPunctuation(word); //Remove punctuation from word
 
       if (cleanedWord.isNotEmpty) {
         //Special Case: Digits
@@ -274,7 +276,7 @@ Future<void> scanProduct(BuildContext context) async {
     words = normalizedIngredient.split(RegExp(r'[\s,]+')).map((word) => word.trim()).toList();
     for (String word in words) {
     String normalizedWord = normalizeAccents(word);
-    String cleanedWord = removePunctuation(normalizedWord.trim());
+    String cleanedWord = removeWordPunctuation(normalizedWord.trim());
 
     if (cleanedWord.isNotEmpty) {
       if (RegExp(r'\d').hasMatch(cleanedWord)) {
@@ -317,8 +319,8 @@ Future<void> scanProduct(BuildContext context) async {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Center(child: Text('Scan Result')),
-        content: Column(
+        title: const Center(child: Text('Scan Result')),
+        content: const Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Center(
@@ -331,7 +333,7 @@ Future<void> scanProduct(BuildContext context) async {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('OK'),
+            child: const Text('OK'),
           ),
         ],
       ),
@@ -406,7 +408,7 @@ Future<void> scanProduct(BuildContext context) async {
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
-      title: Center(child: Text('Scan Result')),
+      title: const Center(child: Text('Scan Result')),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -421,7 +423,7 @@ Future<void> scanProduct(BuildContext context) async {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Container(
-                padding: EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8.0),
                 decoration: BoxDecoration(
                   color: Colors.yellow[100],
                   borderRadius: BorderRadius.circular(8.0),
@@ -457,14 +459,14 @@ Future<void> scanProduct(BuildContext context) async {
                   ),
                 );
               },
-              child: Text('See Details'),
+              child: const Text('See Details'),
             ),
         ],
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text('OK'),
+          child: const Text('OK'),
         ),
       ],
     ),
@@ -483,7 +485,7 @@ Future<void> scanProduct(BuildContext context) async {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Food Allergy Scanner'),
+        title: const Text('Food Allergy Scanner'),
       ),
       body: Consumer<AllergyProvider>(
         builder: (context, allergyProvider, child) {
@@ -492,25 +494,23 @@ Future<void> scanProduct(BuildContext context) async {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(
+                const Text(
                   'Scan a product to check for allergens!',
                   style: TextStyle(fontSize: 20),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: hasAllergies
                       ? () => scanProduct(context)
                       : () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Please add at least one allergen before scanning.')),
-                          );
+                          showSnackBar(context, 'Please add at least one allergen before scanning.');
                         },
-                  child: Text('Scan Product'),
+                  child: const Text('Scan Product'),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () => manageAllergies(context),
-                  child: Text('Manage Allergies'),
+                  child: const Text('Manage Allergies'),
                 ),
               ],
             ),
