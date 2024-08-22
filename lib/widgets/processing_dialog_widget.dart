@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 class ProcessingDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Dialog(
+    return const Dialog(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

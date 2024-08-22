@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+
 class ValidationLoadingDialog extends StatelessWidget {
   final int totalIngredients;
   final Stream<int> progressStream;
 
-  ValidationLoadingDialog({required this.totalIngredients, required this.progressStream});
+  ValidationLoadingDialog(
+      {required this.totalIngredients, required this.progressStream});
 
   @override
   Widget build(BuildContext context) {
@@ -13,11 +15,11 @@ class ValidationLoadingDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            const Text(
               'Validating Ingredients',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             StreamBuilder<int>(
               stream: progressStream,
               initialData: 0,
@@ -26,7 +28,7 @@ class ValidationLoadingDialog extends StatelessWidget {
                 return Column(
                   children: [
                     LinearProgressIndicator(value: progress / totalIngredients),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Text('$progress / $totalIngredients'),
                   ],
                 );

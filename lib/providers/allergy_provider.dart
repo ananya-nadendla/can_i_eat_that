@@ -25,7 +25,7 @@ class AllergyProvider extends ChangeNotifier {
     'Prawn'
   ];
   final List<String> _fish = [
-    'Anchovy', 
+    'Anchovy',
     'Bass',
     'Catfish',
     'Cod',
@@ -50,14 +50,13 @@ class AllergyProvider extends ChangeNotifier {
   ];
 
   final List<String> _legumes = [
-  'Peanut',
-  'Chickpea',
-  'Lentil',
-  'Lupin',
-  'Pea',
-  'Soybeans'
-];
-
+    'Peanut',
+    'Chickpea',
+    'Lentil',
+    'Lupin',
+    'Pea',
+    'Soybeans'
+  ];
 
   List<String> get allergies => _allergies;
   List<String> get treeNuts => _treeNuts;
@@ -157,27 +156,27 @@ class AllergyProvider extends ChangeNotifier {
   }
 
   void removeLegumesAndCorrespondingLegumes() {
-  if (_allergies.contains('Legumes')) {
-    _allergies.remove('Legumes');
-    for (String legume in legumes) {
-      _allergies.remove(legume);
+    if (_allergies.contains('Legumes')) {
+      _allergies.remove('Legumes');
+      for (String legume in legumes) {
+        _allergies.remove(legume);
+      }
+      _saveAllergies();
+      notifyListeners();
     }
-    _saveAllergies();
-    notifyListeners();
   }
-}
-
 
   Future<void> _saveAllergies() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('allergies', _allergies);
-    print('Saved allergies (${_allergies.length}): $_allergies');  //Debugging line
+    print(
+        'Saved allergies (${_allergies.length}): $_allergies'); //Debugging line
   }
 
   Future<void> _loadAllergies() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _allergies = prefs.getStringList('allergies') ?? [];
-    print('Loaded allergies (${_allergies.length}): $_allergies'); 
+    print('Loaded allergies (${_allergies.length}): $_allergies');
     notifyListeners();
   }
 }

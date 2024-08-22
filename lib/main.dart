@@ -22,7 +22,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AllergyProvider()), // Provider for managing allergies
+        ChangeNotifierProvider(
+            create: (_) =>
+                AllergyProvider()), // Provider for managing allergies
       ],
       child: MaterialApp(
         title: 'Food Allergy Scanner', // App title
