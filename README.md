@@ -13,7 +13,8 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
         - Included instruction message @ bottom of the screen
 
 - TO DO:
-    1) (IMPORTANT) Check if dimension values are dynamic
+    1) Camera - update Camera UI to look like Image Cropper UI
+    2) (IMPORTANT) Check if dimension values are dynamic
     3) Deal with frames skipping warning
     4) Deal w/ unused variables (HomeScreen: isValidIngredients)
     5) Batch word validation
