@@ -104,10 +104,15 @@ class _HomeScreenState extends State<HomeScreen> {
             ingredient.isNotEmpty) //Remove empty strings after splitting
         .toList();
 
-    print('validateIngredients() INGREDIENTS: $ingredients');
+    print('validateIngredients() INGREDIENTS - Preduplicate: $ingredients');
 
     // Map to keep track of which words belong to which ingredient
     Map<String, List<String>> ingredientWordsMap = {};
+
+    //Remove duplicate ingredients --> consolidate into 1 ingredient
+    ingredients = ingredients.toSet().toList();
+
+    print('validateIngredients() INGREDIENTS - Postduplicate: $ingredients');
 
     // Send ingredients to validation program
     for (String ingredient in ingredients) {
@@ -277,7 +282,12 @@ class _HomeScreenState extends State<HomeScreen> {
             ingredient.isNotEmpty) // Remove empty strings after splitting
         .toList();
 
-    print('Ingredients: $ingredients');
+    print('Pre-Duplicate Ingredients: $ingredients');
+
+    //Remove duplicate ingredients --> consolidate into 1 ingredient
+    ingredients = ingredients.toSet().toList();
+
+    print('POST-Duplicate Ingredients: $ingredients');
 
     int totalCount = 0; //Number of words
 
