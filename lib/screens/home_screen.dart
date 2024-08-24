@@ -6,10 +6,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:pluralize/pluralize.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:crop_your_image/crop_your_image.dart';
 
 import 'package:food_allergy_scanner/providers/allergy_provider.dart';
 import 'package:food_allergy_scanner/screens/manage_allergies_screen.dart';
 import 'package:food_allergy_scanner/screens/matching_allergens_screen.dart';
+import 'package:food_allergy_scanner/screens/crop_image_screen.dart';
 import 'package:food_allergy_scanner/services/merriam_webster_service.dart';
 import 'package:food_allergy_scanner/widgets/processing_dialog_widget.dart';
 import 'package:food_allergy_scanner/widgets/validation_loading_dialog_widget.dart';
@@ -24,6 +26,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isProcessingImage =
       false; //Controls CircularProgressIndicator in Widget built
   File? _croppedFile;
+  final CropController _cropController = CropController();
+
 
   String removeWordPunctuation(String text) {
     return text.replaceAll(RegExp(r'[^\w\s-&]'), '');
@@ -42,41 +46,26 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<bool> _cropImage(File imageFile) async {
-    final croppedFile = await ImageCropper().cropImage(
-      sourcePath: imageFile.path,
-      compressFormat: ImageCompressFormat.jpg,
-      compressQuality: 100,
-      uiSettings: [
-        AndroidUiSettings(
-          toolbarTitle: 'Cropper',
-          toolbarColor: Colors.deepOrange,
-          toolbarWidgetColor: Colors.white,
-          initAspectRatio: CropAspectRatioPreset.original,
-          lockAspectRatio: false,
-        ),
-        IOSUiSettings(
-          title: 'Cropper',
-        ),
-        WebUiSettings(
-          context: context,
-          presentStyle: WebPresentStyle.dialog,
-          size: const CropperSize(
-            width: 520,
-            height: 520,
-          ),
-        ),
-      ],
-    );
+  final dynamic croppedData = await Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (context) => CropScreen(
+        imageFile: imageFile,
+        cropController: _cropController,
+      ),
+    ),
+  );
 
-    if (croppedFile != null) {
-      setState(() {
-        _croppedFile = File(croppedFile.path);
-      });
-      return true; // Cropping was successful
-    } else {
-      return false; // Cropping was canceled
-    }
+  if (croppedData == null || croppedData is! List<int>) {
+    return false; // Indicate cropping was canceled or data is not valid
   }
+
+  setState(() {
+    _croppedFile = File('${imageFile.path}_cropped.jpg');
+    _croppedFile!.writeAsBytesSync(croppedData);
+  });
+
+  return true; // Indicate cropping was confirmed
+}
 
   Future<Map<String, dynamic>> validateIngredients(
     BuildContext context,
@@ -220,15 +209,16 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     // Crop the image
-    bool isCropped = await _cropImage(File(image.path));
+  bool isCropConfirmed = await _cropImage(File(image.path));
 
-    // User canceled cropping
-    if (!isCropped) {
-      setState(() {
-        _isProcessingImage = false; // Stop processing
-      });
-      return; // Exit scanProduct without continuing to process the image
-    }
+  // User cancelled cropping
+  if (!isCropConfirmed || _croppedFile == null) {
+    setState(() {
+      _isProcessingImage = false; // Stop processing
+    });
+    return;
+  }
+
 
     // Show ProcessingDialog
     showDialog(

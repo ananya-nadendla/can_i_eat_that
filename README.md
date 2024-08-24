@@ -4,19 +4,23 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
-### [0.8.12] - 2024-08-24
+### [0.8.13] - 2024-08-24
 - BUG FIX
     1) Removed duplicate ingredients from ingredients list
+    2) Improved image cropper 
+        - Replaced image_cropper package with crop_your_image package
+        - Created crop_image_screen.dart
+        - Included instruction message @ bottom of the screen
 
 - TO DO:
     1) (IMPORTANT) Check if dimension values are dynamic
-    2) Deal with frames skipping warning
-    3) Deal w/ unused variables (HomeScreen: isValidIngredients)
-    4) Batch word validation
-    5) UI Design
-    6) Web Version - Make
-    6) (Potential Idea) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
-    7) (Potential Idea) Adjustable Camera Viewfinder on live camera when taking photo 
+    3) Deal with frames skipping warning
+    4) Deal w/ unused variables (HomeScreen: isValidIngredients)
+    5) Batch word validation
+    6) UI Design
+    7) Web Version - Make
+    8) (Potential Idea) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
+    9) (Potential Idea) Adjustable Camera Viewfinder on live camera when taking photo 
 
 
 ### [0.8.11] - 2024-08-22
