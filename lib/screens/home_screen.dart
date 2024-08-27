@@ -12,6 +12,8 @@ import 'package:food_allergy_scanner/providers/allergy_provider.dart';
 import 'package:food_allergy_scanner/screens/manage_allergies_screen.dart';
 import 'package:food_allergy_scanner/screens/matching_allergens_screen.dart';
 import 'package:food_allergy_scanner/screens/crop_image_screen.dart';
+import 'package:food_allergy_scanner/screens/camera_screen.dart';
+
 import 'package:food_allergy_scanner/services/merriam_webster_service.dart';
 import 'package:food_allergy_scanner/widgets/processing_dialog_widget.dart';
 import 'package:food_allergy_scanner/widgets/validation_loading_dialog_widget.dart';
@@ -192,30 +194,33 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> scanProduct(BuildContext context) async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.camera);
+    // Navigate to the CameraScreen and get the captured image file
+  final File? imageFile = await Navigator.of(context).push<File>(
+    MaterialPageRoute(builder: (context) => CameraScreen()),
+  );
 
-    // User canceled the picker
-    if (image == null) {
-      setState(() {
-        _isProcessingImage = false; // Stop processing
-      });
-      return;
-    }
-
+  // User canceled the camera capture
+  if (imageFile == null) {
+    setState(() {
+      _isProcessingImage = false; // Stop processing
+    });
+    showSnackBar(context,'Scanning successfully cancelled.');
+    return;
+  }
     // Set the state to show the loading indicator
     setState(() {
       _isProcessingImage = true;
     });
 
     // Crop the image
-  bool isCropConfirmed = await _cropImage(File(image.path));
+  bool isCropConfirmed = await _cropImage(File(imageFile.path));
 
   // User cancelled cropping
   if (!isCropConfirmed || _croppedFile == null) {
     setState(() {
       _isProcessingImage = false; // Stop processing
     });
+    showSnackBar(context,'Scanning successfully cancelled.');
     return;
   }
 

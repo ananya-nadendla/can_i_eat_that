@@ -28,7 +28,7 @@ class _CropScreenState extends State<CropScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Crop Image'),
+        title: const Text('Crop Photo'),
         actions: [
           TextButton(
             onPressed: () {
