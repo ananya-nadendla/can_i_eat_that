@@ -13,7 +13,10 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
         - Note: Padding issues
 
 - TO DO:
-    1) Padding - Fix Camera Screen / Cropping Screen Padding Issues
+    1) Permissions Bug - App asks for audio access, not camera
+    2) Camera Denied - Add check for if camera permissions is denied
+    2) Padding - Fix Camera Screen / Cropping Screen Padding Issues
+
     2) (IMPORTANT) Check if dimension values are dynamic
     3) Deal with frames skipping warning
     4) Deal w/ unused variables (HomeScreen: isValidIngredients)
