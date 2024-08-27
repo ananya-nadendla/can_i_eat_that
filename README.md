@@ -4,7 +4,7 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
-### [0.9.3] - 2024-08-27
+### [0.9.5] - 2024-08-27
 - MINOR FEATURE
     - Upgraded Flutter ("flutter upgrade"), including dependencies
 
@@ -16,6 +16,7 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
         - If denied, two options shown: "Settings" and "Ok"
         - "Ok": Leads to HomeScreen
         - "Settings": Leads to Settings app where user can change permissions
+    4) Made cropping handles further away from edge of screen (to avoid accidental swiping backwards gesture)
 
 - TO DO:
     1) Padding - Fix Camera Screen / Cropping Screen Padding Issues

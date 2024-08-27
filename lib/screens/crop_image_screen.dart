@@ -47,12 +47,15 @@ class _CropScreenState extends State<CropScreen> {
       body: Column(
         children: [
           Expanded(
-            child: Crop(
-              image: File(widget.imageFile.path).readAsBytesSync(),
-              controller: _cropController,
-              onCropped: (croppedData) {
-                Navigator.of(context).pop(croppedData); // Return the cropped data
-              },
+            child: Padding(
+              padding: const EdgeInsets.all(16.0), // Add padding to avoid the edges - prevents back gesture on some phones
+              child: Crop(
+                image: File(widget.imageFile.path).readAsBytesSync(),
+                controller: _cropController,
+                onCropped: (croppedData) {
+                  Navigator.of(context).pop(croppedData); // Return the cropped data
+                },
+              ),
             ),
           ),
           const Padding(
