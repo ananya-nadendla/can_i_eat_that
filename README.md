@@ -4,18 +4,21 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
-### [0.9.1] - 2024-08-27
+### [0.9.3] - 2024-08-27
 - MINOR FEATURE
     - Upgraded Flutter ("flutter upgrade"), including dependencies
 
 - BUG FIX
     1) Camera - Updated Camera UI to look like Image Cropper UI
         - Note: Padding issues
+    2) Permissions Bug - App no longer asks for audio access 
+    3) Permission Denial - App checks if camera permissions is denied
+        - If denied, two options shown: "Settings" and "Ok"
+        - "Ok": Leads to HomeScreen
+        - "Settings": Leads to Settings app where user can change permissions
 
 - TO DO:
-    1) Permissions Bug - App asks for audio access, not camera
-    2) Camera Denied - Add check for if camera permissions is denied
-    2) Padding - Fix Camera Screen / Cropping Screen Padding Issues
+    1) Padding - Fix Camera Screen / Cropping Screen Padding Issues
 
     2) (IMPORTANT) Check if dimension values are dynamic
     3) Deal with frames skipping warning

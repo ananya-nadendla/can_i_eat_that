@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:food_allergy_scanner/screens/home_screen.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({Key? key}) : super(key: key);
@@ -10,9 +12,10 @@ class CameraScreen extends StatefulWidget {
 }
 
 class _CameraScreenState extends State<CameraScreen> {
-  late CameraController _controller;
+  CameraController? _controller;
   late Future<void> _initializeControllerFuture;
   late CameraDescription _selectedCamera;
+  bool _permissionDenied = false;
 
   @override
   void initState() {
@@ -21,28 +24,75 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Future<void> _initializeCamera() async {
-    // Get the list of available cameras
-    final cameras = await availableCameras();
+    // Request camera permission only
+    final permissionStatus = await Permission.camera.request();
 
-    // Find the back camera
-    _selectedCamera = cameras.firstWhere(
-      (camera) => camera.lensDirection == CameraLensDirection.back,
-      orElse: () => cameras.first,
-    );
+    if (!permissionStatus.isGranted) {
+      setState(() {
+        _permissionDenied = true;
+      });
+      return;
+    }
 
-    // Initialize the camera controller
-    _controller = CameraController(_selectedCamera, ResolutionPreset.max);
-    return _controller.initialize();
+    try {
+      final cameras = await availableCameras();
+      _selectedCamera = cameras.firstWhere(
+        (camera) => camera.lensDirection == CameraLensDirection.back,
+        orElse: () => cameras.first,
+      );
+
+      _controller = CameraController(_selectedCamera, ResolutionPreset.max, enableAudio: false);
+
+      await _controller!.initialize();
+    } catch (e) {
+      print('Error initializing camera: $e');
+    }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
+  }
+
+  void _showCameraPermissionDeniedDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Center(child: Text('Camera Permission Denied')),
+        content: const Text(
+          'The camera permission is required to use this feature. Please enable it in your device settings.',
+          textAlign: TextAlign.center,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              openAppSettings(); // Opens app settings
+            },
+            child: const Text('Settings'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => HomeScreen()),
+                (route) => false,
+              );
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_permissionDenied) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showCameraPermissionDeniedDialog();
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Capture Photo'),
@@ -55,13 +105,16 @@ class _CameraScreenState extends State<CameraScreen> {
           ),
           TextButton(
             onPressed: () async {
-              try {
-                await _initializeControllerFuture;
-                final image = await _controller.takePicture();
-                Navigator.of(context)
-                    .pop(File(image.path)); // Return the captured image
-              } catch (e) {
-                print(e);
+              if (_controller != null) {
+                try {
+                  await _initializeControllerFuture;
+                  final image = await _controller!.takePicture();
+                  Navigator.of(context).pop(File(image.path)); // Return the captured image
+                } catch (e) {
+                  print(e);
+                }
+              } else {
+                print('Camera controller is not initialized');
               }
             },
             child: const Text('Capture'),
@@ -72,16 +125,20 @@ class _CameraScreenState extends State<CameraScreen> {
         future: _initializeControllerFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
-            return CameraPreview(_controller);
+            if (_controller != null && _controller!.value.isInitialized) {
+              return CameraPreview(_controller!);
+            } else {
+              return const Center(child: Text('Camera not initialized'));
+            }
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
         },
       ),
       bottomNavigationBar: const Padding(
-        padding: EdgeInsets.all(16.0), //issue
+        padding: EdgeInsets.all(16.0),
         child: Text(
           'Take a photo of an ingredients label. \n Up Next: Crop your photo',
           style: TextStyle(color: Colors.black),
