@@ -17,6 +17,7 @@ class CropScreen extends StatefulWidget {
 
 class _CropScreenState extends State<CropScreen> {
   late CropController _cropController;
+  bool _isCropping = false; // Add a flag to track if cropping is in progress
 
   @override
   void initState() {
@@ -37,9 +38,14 @@ class _CropScreenState extends State<CropScreen> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              _cropController.crop(); // Trigger cropping
-            },
+            onPressed: _isCropping
+                ? null // Disable button while cropping is in progress (to avoid double tap)
+                : () {
+                    setState(() {
+                      _isCropping = true; // Set flag to true
+                    });
+                    _cropController.crop(); // Trigger cropping
+                  },
             child: const Text('Continue'),
           ),
         ],

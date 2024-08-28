@@ -4,6 +4,25 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
+### [0.9.7] - 2024-08-28
+- BUG FIX
+    1) Disabled Continue button (in Crop Screen) once pressed (because multiple presses leads to error)
+    2) Upgraded Camera UI - Added Capture / Retake / Cancel / Approve buttons 
+
+- TO DO:
+    1) Padding - Fix Camera Screen / Cropping Screen Padding Issues
+
+    2) (IMPORTANT) Check if dimension values are dynamic
+    3) Deal with frames skipping warning
+    4) Deal w/ unused variables (HomeScreen: isValidIngredients, cameraScreen: buttonSpacing)
+    5) Batch word validation
+    6) UI Design
+    7) Web Version - Make
+
+    8) (Potential Idea) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
+    9) (Potential Idea) Adjustable Camera Viewfinder on live camera when taking photo 
+
+
 ### [0.9.5] - 2024-08-27
 - MINOR FEATURE
     - Upgraded Flutter ("flutter upgrade"), including dependencies
@@ -17,19 +36,6 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
         - "Ok": Leads to HomeScreen
         - "Settings": Leads to Settings app where user can change permissions
     4) Made cropping handles further away from edge of screen (to avoid accidental swiping backwards gesture)
-
-- TO DO:
-    1) Padding - Fix Camera Screen / Cropping Screen Padding Issues
-
-    2) (IMPORTANT) Check if dimension values are dynamic
-    3) Deal with frames skipping warning
-    4) Deal w/ unused variables (HomeScreen: isValidIngredients)
-    5) Batch word validation
-    6) UI Design
-    7) Web Version - Make
-
-    8) (Potential Idea) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
-    9) (Potential Idea) Adjustable Camera Viewfinder on live camera when taking photo 
 
 
 ### [0.8.13] - 2024-08-24
