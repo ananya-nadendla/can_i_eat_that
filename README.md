@@ -4,10 +4,14 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
-### [0.9.7] - 2024-08-28
+### [0.9.8] - 2024-08-28
 - BUG FIX
     1) Disabled Continue button (in Crop Screen) once pressed (because multiple presses leads to error)
     2) Upgraded Camera UI - Added Capture / Retake / Cancel / Approve buttons 
+    3) Buggy API Calls - Added batch processing (to validateIngredients() in HomeScreen) 
+        - Previous Implementation: Made API Calls for all words concurrently
+            - Issue: Lag, 504 Errors
+        - New Implementation: Batch of 5 words, Smoother/Faster performance
 
 - TO DO:
     1) Padding - Fix Camera Screen / Cropping Screen Padding Issues

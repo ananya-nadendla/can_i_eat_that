@@ -70,84 +70,91 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
   Future<Map<String, dynamic>> validateIngredients(
-    BuildContext context,
-    String text,
-    StreamController<int> progressStream,
-    int totalCount,
-  ) async {
-    final merriamWebsterService = MerriamWebsterService();
-    final allergyProvider =
-        Provider.of<AllergyProvider>(context, listen: false);
-    final predefinedValidWords = allergyProvider.predefinedValidWords;
-    bool isValidIngredients = true;
-    int validCount = 0;
-    int checkedCount = 0;
+  BuildContext context,
+  String text,
+  StreamController<int> progressStream,
+  int totalCount, {
+  int batchSize = 5, //Api request batch size
+}) async {
+  final merriamWebsterService = MerriamWebsterService();
+  final allergyProvider =
+      Provider.of<AllergyProvider>(context, listen: false);
+  final predefinedValidWords = allergyProvider.predefinedValidWords;
+  bool isValidIngredients = true;
+  int validCount = 0;
+  int checkedCount = 0;
 
-    List<String> invalidIngredients = [];
-    List<String> toValidate = [];
+  List<String> invalidIngredients = [];
+  List<String> toValidate = [];
 
-    // Split ingredients list into ingredients (can contain multiple words) + cleanup
-    List<String> ingredients = text
-        .split(RegExp(
-            r'\s*(?:\band\b|\bor\b|[\(\)\[\],.!?:])\s*')) //v0.8.3 - Remove AND, OR, and COLON
-        .map((ingredient) => ingredient.trim()) //Remove whitespace
-        .where((ingredient) =>
-            ingredient.isNotEmpty) //Remove empty strings after splitting
+  // Split ingredients list into ingredients (can contain multiple words) + cleanup
+  List<String> ingredients = text
+      .split(RegExp(
+          r'\s*(?:\band\b|\bor\b|[\(\)\[\],.!?:])\s*')) //v0.8.3 - Remove AND, OR, and COLON
+      .map((ingredient) => ingredient.trim()) //Remove whitespace
+      .where((ingredient) =>
+          ingredient.isNotEmpty) //Remove empty strings after splitting
+      .toList();
+
+  print('validateIngredients() INGREDIENTS - Preduplicate: $ingredients');
+
+  // Map to keep track of which words belong to which ingredient
+  Map<String, List<String>> ingredientWordsMap = {};
+
+  //Remove duplicate ingredients --> consolidate into 1 ingredient
+  ingredients = ingredients.toSet().toList();
+
+  print('validateIngredients() INGREDIENTS - Postduplicate: $ingredients');
+
+  // Send ingredients to validation program
+  for (String ingredient in ingredients) {
+    String normalizedIngredient = normalizeAccents(
+        ingredient); //Remove special accents from ingredients
+
+    //Extract words from ingredients
+    List<String> words = normalizedIngredient
+        .split(RegExp(r'[\s,]+'))
+        .map((word) => word.trim())
         .toList();
+    print(
+        'validateIngredients() WORDS: $words'); //Debugging - print split words in an ingredient
+    ingredientWordsMap[ingredient] = words;
 
-    print('validateIngredients() INGREDIENTS - Preduplicate: $ingredients');
+    for (String word in words) {
+      String cleanedWord =
+          removeWordPunctuation(word); //Remove punctuation from word
 
-    // Map to keep track of which words belong to which ingredient
-    Map<String, List<String>> ingredientWordsMap = {};
+      if (cleanedWord.isNotEmpty) {
+        //Special Case: Digits
+        if (RegExp(r'\d').hasMatch(cleanedWord)) {
+          print(
+              'Skipping word with digits: $cleanedWord'); // e.g., "B3" in Vitamin B3
+          continue;
+        }
 
-    //Remove duplicate ingredients --> consolidate into 1 ingredient
-    ingredients = ingredients.toSet().toList();
-
-    print('validateIngredients() INGREDIENTS - Postduplicate: $ingredients');
-
-    // Send ingredients to validation program
-    for (String ingredient in ingredients) {
-      String normalizedIngredient = normalizeAccents(
-          ingredient); //Remove special accents from ingredients
-
-      //Extract words from ingredients
-      List<String> words = normalizedIngredient
-          .split(RegExp(r'[\s,]+'))
-          .map((word) => word.trim())
-          .toList();
-      print(
-          'validateIngredients() WORDS: $words'); //Debugging - print split words in an ingredient
-      ingredientWordsMap[ingredient] = words;
-
-      for (String word in words) {
-        String cleanedWord =
-            removeWordPunctuation(word); //Remove punctuation from word
-
-        if (cleanedWord.isNotEmpty) {
-          //Special Case: Digits
-          if (RegExp(r'\d').hasMatch(cleanedWord)) {
-            print(
-                'Skipping word with digits: $cleanedWord'); // e.g., "B3" in Vitamin B3
-            continue;
-          }
-
-          //Special Case: Predefined valid words (i.e 'vit', 'fd&c', 'd&c')
-          if (predefinedValidWords.contains(cleanedWord.toLowerCase())) {
-            validCount++;
-            checkedCount++;
-            print('Skipping - PREDEFINED VALID ($validCount): $cleanedWord');
-            progressStream
-                .add(checkedCount); // Update progress for each checked word
-            continue;
-          } else {
-            toValidate.add(cleanedWord); //Send word for validation
-          }
+        //Special Case: Predefined valid words (i.e 'vit', 'fd&c', 'd&c')
+        if (predefinedValidWords.contains(cleanedWord.toLowerCase())) {
+          validCount++;
+          checkedCount++;
+          print('Skipping - PREDEFINED VALID ($validCount): $cleanedWord');
+          progressStream
+              .add(checkedCount); // Update progress for each checked word
+          continue;
+        } else {
+          toValidate.add(cleanedWord); //Send word for validation
         }
       }
     }
+  }
 
-    // Word Validation - Perform API validation in parallel
-    List<Future<void>> validationFutures = toValidate.map((word) async {
+  // Batch processing
+  for (int i = 0; i < toValidate.length; i += batchSize) {
+    final batch = toValidate.sublist(
+      i,
+      i + batchSize > toValidate.length ? toValidate.length : i + batchSize,
+    );
+
+    List<Future<void>> validationFutures = batch.map((word) async {
       checkedCount++;
       print('Validating word ($checkedCount): $word');
       bool isValid =
@@ -180,18 +187,20 @@ class _HomeScreenState extends State<HomeScreen> {
       progressStream.add(checkedCount); // Update progress for each checked word
     }).toList();
 
-    // Wait for all validations to complete
+    // Wait for the batch to complete before moving on
     await Future.wait(validationFutures);
-    double validityPercentage = (validCount / totalCount) * 100;
-    print('Valid Count: $validCount, Total Count: $totalCount');
-    print('Validity Percentage: $validityPercentage%');
-
-    return {
-      'isValidIngredients': isValidIngredients,
-      'validityPercentage': validityPercentage,
-      'invalidIngredients': invalidIngredients,
-    };
   }
+
+  double validityPercentage = (validCount / totalCount) * 100;
+  print('Valid Count: $validCount, Total Count: $totalCount');
+  print('Validity Percentage: $validityPercentage%');
+
+  return {
+    'isValidIngredients': isValidIngredients,
+    'validityPercentage': validityPercentage,
+    'invalidIngredients': invalidIngredients,
+  };
+}
 
   Future<void> scanProduct(BuildContext context) async {
     // Navigate to the CameraScreen and get the captured image file
