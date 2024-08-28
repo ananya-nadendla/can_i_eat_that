@@ -11,6 +11,7 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 - TO DO:
     1) Padding - Fix Camera Screen / Cropping Screen Padding Issues
+    2) Make cropScreen backArrow / backGesture go to cameraScreen
 
     2) (IMPORTANT) Check if dimension values are dynamic
     3) Deal with frames skipping warning
