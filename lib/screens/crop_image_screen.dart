@@ -39,7 +39,8 @@ class _CropScreenState extends State<CropScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(false); // Indicate cropping was canceled
+                Navigator.of(context)
+                    .pop(false); // Indicate cropping was canceled
               },
               child: const Text('Cancel'),
             ),
@@ -56,29 +57,43 @@ class _CropScreenState extends State<CropScreen> {
             ),
           ],
         ),
-        body: Column(
+        body: Stack(
           children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0), // Add padding to avoid the edges - prevents back gesture on some phones
-                child: Crop(
-                  image: File(widget.imageFile.path).readAsBytesSync(),
-                  controller: _cropController,
-                  onCropped: (croppedData) {
-                    Navigator.of(context).pop(croppedData); // Return the cropped data
-                  },
+            Column(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(
+                        16.0), // Add padding to avoid the edges - prevents back gesture on some phones
+                    child: Crop(
+                      image: File(widget.imageFile.path).readAsBytesSync(),
+                      controller: _cropController,
+                      onCropped: (croppedData) {
+                        Navigator.of(context)
+                            .pop(croppedData); // Return the cropped data
+                      },
+                    ),
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text(
+                    'Crop the image to include only the ingredients you wish to scan.',
+                    style: TextStyle(color: Colors.black),
+                    softWrap: true,
+                    overflow: TextOverflow.visible,
+                  ),
+                ),
+              ],
+            ),
+            if (_isCropping)
+              Container(
+                color: Colors.black.withOpacity(0.5), // Tinted background
+
+                child: Center(
+                  child: CircularProgressIndicator(),
                 ),
               ),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text(
-                'Crop the image to include only the ingredients you wish to scan.',
-                style: TextStyle(color: Colors.black),
-                softWrap: true,
-                overflow: TextOverflow.visible,
-              ),
-            ),
           ],
         ),
       ),
