@@ -121,7 +121,6 @@ class _CameraScreenState extends State<CameraScreen> {
     
     // Define dynamic sizes based on screen dimensions
     final buttonSize = screenWidth * 0.15; // 15% of screen width
-    final buttonSpacing = screenWidth * 0.1; // 10% of screen width
     final bottomPadding = screenHeight * 0.05; // 5% of screen height
     
     if (_permissionDenied) {
@@ -197,7 +196,7 @@ class _CameraScreenState extends State<CameraScreen> {
                           IconButton(
                             icon: const Icon(Icons.close, color: Colors.red),
                             iconSize: buttonSize,
-                            onPressed: _cancelCameraCapture, // Return null instead of navigating to HomeScreen
+                            onPressed: _cancelCameraCapture, // Return null to HomeScreen
                           ),
                           IconButton(
                             icon: const Icon(Icons.refresh, color: Colors.blue),
@@ -219,14 +218,17 @@ class _CameraScreenState extends State<CameraScreen> {
             ),
             
             // Camera Message Section
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02), // 2% of screen height
-              child: const Text(
-                'Take a photo of an ingredients label. \n Up Next: Crop your photo',
-                style: TextStyle(color: Colors.black),
-                softWrap: true,
-                overflow: TextOverflow.visible,
-                textAlign: TextAlign.center,
+            Align(
+              alignment: Alignment.bottomCenter, // Ensure the text is centered at the bottom
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02), // 2% of screen height
+                child: const Text(
+                  'Take a photo of an ingredients label. \n Up Next: Crop your photo',
+                  style: TextStyle(color: Colors.black),
+                  softWrap: true,
+                  overflow: TextOverflow.visible,
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
           ],
