@@ -27,11 +27,8 @@ class _CropScreenState extends State<CropScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        // Handle the back navigation
-        return false; // Returning false disables the back navigation
-      },
+    return PopScope(
+      canPop: false, // Prevent back navigation
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Crop Photo'),
@@ -89,7 +86,6 @@ class _CropScreenState extends State<CropScreen> {
             if (_isCropping)
               Container(
                 color: Colors.black.withOpacity(0.5), // Tinted background
-
                 child: Center(
                   child: CircularProgressIndicator(),
                 ),

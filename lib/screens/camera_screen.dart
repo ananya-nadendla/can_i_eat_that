@@ -78,7 +78,7 @@ class _CameraScreenState extends State<CameraScreen> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (context) => HomeScreen()), // When user hits "Ok", send back to HomeScreen
+                MaterialPageRoute(builder: (context) => HomeScreen()), // When user hits "OK", send back to HomeScreen
                 (route) => false,
               );
             },
@@ -113,11 +113,6 @@ class _CameraScreenState extends State<CameraScreen> {
     Navigator.of(context).pop(null); // Return null to indicate cancellation
   }
 
-  Future<bool> _onWillPop() async {
-    // Handle the back navigation
-    return false; // Returning false disables the back navigation
-  }
-
   @override
   Widget build(BuildContext context) {
     // Fetch screen dimensions
@@ -135,8 +130,8 @@ class _CameraScreenState extends State<CameraScreen> {
       });
     }
 
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false, // Prevent back navigation
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Capture Photo'),
