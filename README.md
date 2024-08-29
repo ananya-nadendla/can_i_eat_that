@@ -16,6 +16,11 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
         - Solved Issue: Bottom message kept switching from left-align to center-align
         - Solved Issue: Static padding values made camera preview offcentered
 
+- NOTES:
+    1) Removal of "And", "Or", "And/Or"
+        - Splits phrase like "Wheat and Oat" into two ingredients: "Wheat", "Oat"
+        - Issue: Splits "Natural and Artifical Flavouring" into "Natural", "Artifical Flavouring"
+
 - TO DO:
     1) (IMPORTANT) Check if dimension values are dynamic
     2) Deal w/ unused variables (HomeScreen: isValidIngredients)
