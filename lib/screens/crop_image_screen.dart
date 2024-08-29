@@ -17,7 +17,7 @@ class CropScreen extends StatefulWidget {
 
 class _CropScreenState extends State<CropScreen> {
   late CropController _cropController;
-  bool _isCropping = false; // Add a flag to track if cropping is in progress
+  bool _isCropping = false;
 
   @override
   void initState() {
@@ -25,34 +25,29 @@ class _CropScreenState extends State<CropScreen> {
     _cropController = widget.cropController;
   }
 
+  void _cancelCrop() {
+    Navigator.of(context).pop(false); // Indicate cropping was canceled
+  }
+
+  void _startCropping() {
+    setState(() {
+      _isCropping = true;
+    });
+    _cropController.crop();
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Fetch screen dimensions
+    final screenHeight = MediaQuery.of(context).size.height;
+    final bottomPadding = screenHeight * 0.05; // 5% of screen height
+
     return PopScope(
       canPop: false, // Prevent back navigation
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Crop Photo'),
           automaticallyImplyLeading: false, // Remove the back arrow
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context)
-                    .pop(false); // Indicate cropping was canceled
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: _isCropping
-                  ? null // Disable button while cropping is in progress (to avoid double tap)
-                  : () {
-                      setState(() {
-                        _isCropping = true; // Set flag to true
-                      });
-                      _cropController.crop(); // Trigger cropping
-                    },
-              child: const Text('Continue'),
-            ),
-          ],
         ),
         body: Stack(
           children: [
@@ -60,18 +55,46 @@ class _CropScreenState extends State<CropScreen> {
               children: [
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.all(
-                        16.0), // Add padding to avoid the edges - prevents back gesture on some phones
+                    padding: const EdgeInsets.all(16.0), // Add padding around cropper widget to avoid the edges - prevents back gesture on some phones
                     child: Crop(
                       image: File(widget.imageFile.path).readAsBytesSync(),
                       controller: _cropController,
                       onCropped: (croppedData) {
-                        Navigator.of(context)
-                            .pop(croppedData); // Return the cropped data
+                        Navigator.of(context).pop(croppedData); // Return the cropped data
                       },
                     ),
                   ),
                 ),
+                
+                // Cropper Buttons Section with Text Only
+                Padding(
+                  padding: EdgeInsets.only(bottom: bottomPadding),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      TextButton(
+                        onPressed: _isCropping ? null : _cancelCrop, // Disable button while cropping is in progress
+                        child: const Text('Cancel'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.red, // Background color
+                          textStyle: const TextStyle(fontSize: 18),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: _isCropping ? null : _startCropping, // Disable button while cropping is in progress
+                        child: const Text('Crop'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.green, // Background color
+                          textStyle: const TextStyle(fontSize: 18),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Cropping Message Section
                 const Padding(
                   padding: EdgeInsets.all(16),
                   child: Text(
@@ -79,14 +102,17 @@ class _CropScreenState extends State<CropScreen> {
                     style: TextStyle(color: Colors.black),
                     softWrap: true,
                     overflow: TextOverflow.visible,
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ],
             ),
+            
+            // Cropping Progress Indicator
             if (_isCropping)
               Container(
                 color: Colors.black.withOpacity(0.5), // Tinted background
-                child: Center(
+                child: const Center(
                   child: CircularProgressIndicator(),
                 ),
               ),

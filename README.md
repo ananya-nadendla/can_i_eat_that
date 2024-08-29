@@ -4,10 +4,11 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
-### [0.9.10] - 2024-08-29
+### [0.9.11] - 2024-08-29
 - BUG FIX
     1) Removed back navigation on CropScreen/CameraScreen (replaced deprecated onWillPop with canPop)
     2) CropScreen - Added CircularLoadingIndicator during the pause that occurs after user hits "Continue"
+    3) CropScreen - Modified buttons to match Camera UI
 
 - TO DO:
     1) Padding - Fix Camera Screen / Cropping Screen Padding Issues
