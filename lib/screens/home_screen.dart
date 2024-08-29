@@ -89,12 +89,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Split ingredients list into ingredients (can contain multiple words) + cleanup
   List<String> ingredients = text
-      .split(RegExp(
-          r'\s*(?:\band\b|\bor\b|[\(\)\[\],.!?:])\s*')) //v0.8.3 - Remove AND, OR, and COLON
-      .map((ingredient) => ingredient.trim()) //Remove whitespace
-      .where((ingredient) =>
-          ingredient.isNotEmpty) //Remove empty strings after splitting
-      .toList();
+    .toLowerCase()
+    .split(RegExp(
+        r'\s*(?:\band\b|\bor\b|[\(\)\[\],.!?:])\s*')) //v0.8.3 - Remove AND, OR, and COLON
+    .map((ingredient) => ingredient.trim())
+    .where((ingredient) =>
+        ingredient.isNotEmpty &&
+        ingredient.length > 1 && // Exclude single characters
+        ingredient != '/')     // Exclude slashes (if ingredient says and/or)
+    .toList();
+
 
   print('validateIngredients() INGREDIENTS - Preduplicate: $ingredients');
 
@@ -277,14 +281,19 @@ class _HomeScreenState extends State<HomeScreen> {
     // Show ValidationLoadingDialog for validation
     final progressStream = StreamController<int>();
 
-    // Create ingredients list using the same logic as validateIngredients
-    List<String> ingredients = combinedText
-        .split(RegExp(
-            r'\s*(?:\band\b|\bor\b|[\(\)\[\],.!?:])\s*')) //Splitting logic - v0.8.3 - Remove AND, OR, and COLON
-        .map((ingredient) => ingredient.trim()) // Remove whitespace
-        .where((ingredient) =>
-            ingredient.isNotEmpty) // Remove empty strings after splitting
-        .toList();
+  // Create ingredients list using the same logic as validateIngredients
+      // Split ingredients list into ingredients (can contain multiple words) + cleanup
+  List<String> ingredients = combinedText
+    .toLowerCase()
+    .split(RegExp(
+        r'\s*(?:\band\b|\bor\b|[\(\)\[\],.!?:])\s*')) //v0.8.3 - Remove AND, OR, and COLON
+    .map((ingredient) => ingredient.trim())
+    .where((ingredient) =>
+        ingredient.isNotEmpty &&
+        ingredient.length > 1 && // Exclude single characters
+        ingredient != '/')     // Exclude slashes (if ingredient says "and/or")
+    .toList();
+
 
     print('Pre-Duplicate Ingredients: $ingredients');
 
