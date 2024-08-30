@@ -242,6 +242,63 @@ class _HomeScreenState extends State<HomeScreen> {
   };
 }
 
+Map<String, dynamic> findMatches(
+    List<String> ingredients,
+    List<String> allergies,
+    List<String> invalidIngredients) {
+  List<String> matchingAllergens = [];
+  List<String> safeIngredients = [];
+  bool isSafe = true;
+
+  if (ingredients.isNotEmpty) {
+    print('scanProduct()/findMatches() INGREDIENTS: $ingredients');
+
+    for (String ingredient in ingredients) {
+      String cleanedIngredient = ingredient.trim();
+
+      // Exclude words with percentages and empty words
+      if (cleanedIngredient.isNotEmpty &&
+          !RegExp(r'\d+%').hasMatch(cleanedIngredient)) {
+        bool matchesAllergy = false;
+        for (String allergy in allergies) {
+          // Check ingredient against single + plural versions of allergen
+          String singular = Pluralize().singular(allergy);
+          String plural = Pluralize().plural(allergy);
+          RegExp regexSingular = RegExp(r"\b" + RegExp.escape(singular) + r"\b", caseSensitive: false);
+          RegExp regexPlural = RegExp(r"\b" + RegExp.escape(plural) + r"\b", caseSensitive: false);
+
+          print('[Checking: Singular]: $singular, [Plural: $plural] --> In [ingredient: $cleanedIngredient]');
+
+          if (regexSingular.hasMatch(cleanedIngredient) ||
+              regexPlural.hasMatch(cleanedIngredient)) {
+            print('MATCH FOUND: "$allergy" in ingredient: "$cleanedIngredient"');
+            matchesAllergy = true;
+            isSafe = false; // Set isSafe to false if any match is found
+            matchingAllergens.add(allergy);
+            break; // Stop checking other allergies if a match is found
+          }
+        }
+
+        // If no allergies matched and the ingredient is not invalid, add it to safeIngredients
+        if (!matchesAllergy && !invalidIngredients.contains(cleanedIngredient)) {
+          safeIngredients.add(cleanedIngredient);
+        }
+      }
+    }
+  } else {
+    isSafe = false; // Set isSafe to false if no ingredients are found
+  }
+
+  // Remove duplicates from matchingAllergens
+  matchingAllergens = matchingAllergens.toSet().toList();
+
+  return {
+    'matchingAllergens': matchingAllergens,
+    'safeIngredients': safeIngredients,
+    'isSafe': isSafe,
+  };
+}
+
 
   Future<void> scanProduct(BuildContext context) async {
     // Navigate to the CameraScreen and get the captured image file
@@ -324,14 +381,11 @@ class _HomeScreenState extends State<HomeScreen> {
   //Validate Ingredients
   final validationResult = await validateIngredients(context, ingredientsText, progressStream);
   
-  //Catch return values
+   //Catch return values
     bool isValidIngredients = validationResult['isValidIngredients'];
     double validityPercentage = validationResult['validityPercentage'];
-    List<String> invalidAllergens = validationResult['invalidIngredients'];
+    List<String> invalidIngredients = validationResult['invalidIngredients'];
 
-    //print("IMPORTED INGREDIENTS: $allIngredients");
-    //print("IMPORTED WORDS: $allWords");
-    //print("IMPORTED TOTALCOUNT: $totalCount2");
 
     // Close the StreamController
     progressStream.close();
@@ -373,62 +427,21 @@ class _HomeScreenState extends State<HomeScreen> {
     AllergyProvider allergyProvider =
         Provider.of<AllergyProvider>(context, listen: false);
     List<String> allergies = allergyProvider.allergies;
-    List<String> matchingAllergens = [];
-    List<String> safeIngredients = [];
-    bool isSafe = true;
 
-    //NEW2 - concise matching logic
-
-    if (ingredients.isNotEmpty) {
-  print('scanProduct() INGREDIENTS: $ingredients');
-
-  for (String ingredient in ingredients) {
-    String cleanedIngredient = ingredient.trim();
-
-    // Exclude words with percentages and empty words
-    if (cleanedIngredient.isNotEmpty &&
-        !RegExp(r'\d+%').hasMatch(cleanedIngredient)) {
-      bool matchesAllergy = false;
-      for (String allergy in allergies) {
-
-        //Check ingredient against single + plural versions of allergen
-        String singular = Pluralize().singular(allergy);
-        String plural = Pluralize().plural(allergy);
-        RegExp regexSingular = RegExp(r"\b" + RegExp.escape(singular) + r"\b", caseSensitive: false);
-        RegExp regexPlural = RegExp(r"\b" + RegExp.escape(plural) + r"\b", caseSensitive: false);
-
-        print('[Checking: Singular]: $singular, [Plural: $plural] --> In [ingredient: $cleanedIngredient]');
-
-        if (regexSingular.hasMatch(cleanedIngredient) ||
-            regexPlural.hasMatch(cleanedIngredient)) {
-          print('MATCH FOUND: "$allergy" in ingredient: "$cleanedIngredient"');
-          matchesAllergy = true;
-          isSafe = false; // Set isSafe to false if any match is found
-          matchingAllergens.add(allergy);
-          break; // Stop checking other allergies if a match is found
-        }
-      }
-      
-      // If no allergies matched and the ingredient is not invalid, add it to safeIngredients
-      if (!matchesAllergy && !invalidAllergens.contains(cleanedIngredient)) {
-        safeIngredients.add(cleanedIngredient);
-      }
-    }
-  }
-} else {
-  isSafe = false; // Set isSafe to false if no ingredients are found
-}
-
-// Remove duplicates from matchingAllergens
-matchingAllergens = matchingAllergens.toSet().toList();
+    // Find matches between allergens and ingredients
+    final result = findMatches(ingredients, allergies, invalidIngredients);
+    //Capture returned data
+    List<String> matchingAllergens = result['matchingAllergens'];
+    List<String> safeIngredients = result['safeIngredients'];
+    bool isSafe = result['isSafe'];
 
 
     //Debugging - array contents
     print('Matching Allergens: ${matchingAllergens.length}');
     print(matchingAllergens);
 
-    print('Invalid Allergens: ${invalidAllergens.length}');
-    print(invalidAllergens);
+    print('Invalid Allergens: ${invalidIngredients.length}');
+    print(invalidIngredients);
 
     print('Safe Ingredients: ${safeIngredients.length}');
     print(safeIngredients);
@@ -486,7 +499,7 @@ matchingAllergens = matchingAllergens.toSet().toList();
                     MaterialPageRoute(
                       builder: (context) => MatchingAllergensScreen(
                         matchingAllergens: matchingAllergens,
-                        invalidAllergens: invalidAllergens,
+                        invalidIngredients: invalidIngredients,
                         safeIngredients: safeIngredients,
                       ),
                     ),

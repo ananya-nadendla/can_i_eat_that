@@ -3,12 +3,12 @@ import 'package:food_allergy_scanner/utils/utils.dart';
 
 class MatchingAllergensScreen extends StatelessWidget {
   final List<String> matchingAllergens; // List of matching allergens
-  final List<String> invalidAllergens; // List of invalid allergens
+  final List<String> invalidIngredients; // List of invalid allergens
   final List<String> safeIngredients; // List of safe ingredients
 
   MatchingAllergensScreen({
     required this.matchingAllergens,
-    required this.invalidAllergens,
+    required this.invalidIngredients,
     required this.safeIngredients,
   });
 
@@ -41,7 +41,7 @@ class MatchingAllergensScreen extends StatelessWidget {
                   }).toList(),
                 ),
               ],
-              if (invalidAllergens.isNotEmpty) ...[
+              if (invalidIngredients.isNotEmpty) ...[
                 const SizedBox(height: 20),
                 const Center(
                   child: Text(
@@ -51,7 +51,7 @@ class MatchingAllergensScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Column(
-                  children: invalidAllergens.map((ingredient) {
+                  children: invalidIngredients.map((ingredient) {
                     return ListTile(
                       leading: const Icon(Icons.help,
                           color: Colors.orange), // Blue question mark icon
