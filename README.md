@@ -4,6 +4,24 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
+### [0.9.16] - 2024-08-30
+- BUG FIX
+    1) Made Special Case where "and" is not removed in the phrase "Natural and Artificial"
+        - (Note: This addresses note in v0.9.13)
+    2) HomeScreen Rework
+        - (2.a) Added method normalizeIngredients() - removed redundant ingredient normalization in scanProduct() and validateIngredients()
+        - (2.b) Updated scanProduct() matching logic to be less redundant
+
+- TO DO:
+    1) (IMPORTANT) Check if dimension values are dynamic
+    2) Deal w/ unused variables (HomeScreen: isValidIngredients)
+    3) UI Design
+    4) Web Version - Make
+
+    5) (Potential Idea) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
+    6) (Potential Idea) Adjustable Camera Viewfinder on live camera when taking photo 
+
+
 ### [0.9.13] - 2024-08-29
 - BUG FIX
     1) Removed back navigation on CropScreen/CameraScreen (replaced deprecated onWillPop with canPop)
@@ -20,15 +38,6 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
     1) Removal of "And", "Or", "And/Or"
         - Splits phrase like "Wheat and Oat" into two ingredients: "Wheat", "Oat"
         - Issue: Splits "Natural and Artifical Flavouring" into "Natural", "Artifical Flavouring"
-
-- TO DO:
-    1) (IMPORTANT) Check if dimension values are dynamic
-    2) Deal w/ unused variables (HomeScreen: isValidIngredients)
-    3) UI Design
-    4) Web Version - Make
-
-    5) (Potential Idea) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
-    6) (Potential Idea) Adjustable Camera Viewfinder on live camera when taking photo 
 
 
 ### [0.9.8] - 2024-08-28

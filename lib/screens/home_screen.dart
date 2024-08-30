@@ -2,10 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:pluralize/pluralize.dart';
-import 'package:image_cropper/image_cropper.dart';
 import 'package:crop_your_image/crop_your_image.dart';
 
 import 'package:food_allergy_scanner/providers/allergy_provider.dart';
@@ -18,6 +16,8 @@ import 'package:food_allergy_scanner/services/merriam_webster_service.dart';
 import 'package:food_allergy_scanner/widgets/processing_dialog_widget.dart';
 import 'package:food_allergy_scanner/widgets/validation_loading_dialog_widget.dart';
 import 'package:food_allergy_scanner/utils/utils.dart';
+
+//Removed ingredients/words/totalCount from being returned in validateIngredients, since normalizeIngredients already does so
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -32,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
   String removeWordPunctuation(String text) {
-    return text.replaceAll(RegExp(r'[^\w\s-&]'), '');
+    return text.replaceAll(RegExp(r'[^\w\s-&]'), ''); //allow '&', '-' (for "fd&c", "semi-skimmed")
   }
 
   String normalizeAccents(String input) {
@@ -73,80 +73,47 @@ class _HomeScreenState extends State<HomeScreen> {
   BuildContext context,
   String text,
   StreamController<int> progressStream,
-  int totalCount, {
-  int batchSize = 5, //Api request batch size
-}) async {
+  {
+    int batchSize = 5, //Api request batch size
+  }) async {
   final merriamWebsterService = MerriamWebsterService();
-  final allergyProvider =
-      Provider.of<AllergyProvider>(context, listen: false);
+  final allergyProvider = Provider.of<AllergyProvider>(context, listen: false);
   final predefinedValidWords = allergyProvider.predefinedValidWords;
   bool isValidIngredients = true;
   int validCount = 0;
   int checkedCount = 0;
 
+  // Parse ingredients and words once --> next: validation
+  final normalizedData = normalizeIngredients(text);
+  final ingredients = normalizedData['ingredients'] as List<String>;
+  final allWords = normalizedData['words'] as List<String>;
+  final ingredientWordsMap = normalizedData['ingredientWordsMap'] as Map<String, List<String>>;
+  final totalCount = normalizedData['totalCount'] as int;
+
   List<String> invalidIngredients = [];
   List<String> toValidate = [];
 
-  // Split ingredients list into ingredients (can contain multiple words) + cleanup
-  List<String> ingredients = text
-    .toLowerCase()
-    .split(RegExp(
-        r'\s*(?:\band\b|\bor\b|[\(\)\[\],.!?:])\s*')) //v0.8.3 - Remove AND, OR, and COLON
-    .map((ingredient) => ingredient.trim())
-    .where((ingredient) =>
-        ingredient.isNotEmpty &&
-        ingredient.length > 1 && // Exclude single characters
-        ingredient != '/')     // Exclude slashes (if ingredient says and/or)
-    .toList();
+  print('validateIngredients() INGREDIENTS: $ingredients');
 
+  for (String word in allWords) {
+    String cleanedWord = removeWordPunctuation(word); // Remove punctuation from word
 
-  print('validateIngredients() INGREDIENTS - Preduplicate: $ingredients');
+    if (cleanedWord.isNotEmpty) {
+      // Special Case: Digits
+      if (RegExp(r'\d').hasMatch(cleanedWord)) {
+        print('Skipping word with digits: $cleanedWord'); // e.g., "B3" in Vitamin B3
+        continue;
+      }
 
-  // Map to keep track of which words belong to which ingredient
-  Map<String, List<String>> ingredientWordsMap = {};
-
-  //Remove duplicate ingredients --> consolidate into 1 ingredient
-  ingredients = ingredients.toSet().toList();
-
-  print('validateIngredients() INGREDIENTS - Postduplicate: $ingredients');
-
-  // Send ingredients to validation program
-  for (String ingredient in ingredients) {
-    String normalizedIngredient = normalizeAccents(
-        ingredient); //Remove special accents from ingredients
-
-    //Extract words from ingredients
-    List<String> words = normalizedIngredient
-        .split(RegExp(r'[\s,]+'))
-        .map((word) => word.trim())
-        .toList();
-    print(
-        'validateIngredients() WORDS: $words'); //Debugging - print split words in an ingredient
-    ingredientWordsMap[ingredient] = words;
-
-    for (String word in words) {
-      String cleanedWord =
-          removeWordPunctuation(word); //Remove punctuation from word
-
-      if (cleanedWord.isNotEmpty) {
-        //Special Case: Digits
-        if (RegExp(r'\d').hasMatch(cleanedWord)) {
-          print(
-              'Skipping word with digits: $cleanedWord'); // e.g., "B3" in Vitamin B3
-          continue;
-        }
-
-        //Special Case: Predefined valid words (i.e 'vit', 'fd&c', 'd&c')
-        if (predefinedValidWords.contains(cleanedWord.toLowerCase())) {
-          validCount++;
-          checkedCount++;
-          print('Skipping - PREDEFINED VALID ($validCount): $cleanedWord');
-          progressStream
-              .add(checkedCount); // Update progress for each checked word
-          continue;
-        } else {
-          toValidate.add(cleanedWord); //Send word for validation
-        }
+      // Special Case: Predefined valid words (i.e 'vit', 'fd&c', 'd&c')
+      if (predefinedValidWords.contains(cleanedWord.toLowerCase())) {
+        validCount++;
+        checkedCount++;
+        print('Skipping - PREDEFINED VALID ($validCount): $cleanedWord');
+        progressStream.add(checkedCount); // Update progress for each checked word
+        continue;
+      } else {
+        toValidate.add(cleanedWord); // Send word for validation
       }
     }
   }
@@ -161,17 +128,16 @@ class _HomeScreenState extends State<HomeScreen> {
     List<Future<void>> validationFutures = batch.map((word) async {
       checkedCount++;
       print('Validating word ($checkedCount): $word');
-      bool isValid =
-          await merriamWebsterService.isValidWord(word.toLowerCase());
+      bool isValid = await merriamWebsterService.isValidWord(word.toLowerCase());
 
       if (isValid) {
         //Ingredient is valid
         validCount++;
         print("WORD VALID!! ($validCount): $word");
       } else {
-        //Ingredient is invalid
-        print('Word not found in dictionary: $word');
         isValidIngredients = false;
+        //Ingredient is invalid
+        print('WORD INVALID!! - Word not found in dictionary: [$word]');
 
         // Mark the entire ingredient as invalid
         String? ingredient;
@@ -180,8 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
               .firstWhere((entry) => entry.value.contains(word))
               .key;
         } catch (e) {
-          // Handle the case where the word is not found
-          ingredient = null;
+          ingredient = null; // Handle the case where the word is not found
         }
 
         if (ingredient != null && !invalidIngredients.contains(ingredient)) {
@@ -206,150 +171,167 @@ class _HomeScreenState extends State<HomeScreen> {
   };
 }
 
+  
+  
+  Map<String, dynamic> normalizeIngredients(String text) {
+   
+    //Removes newlines from scanned text + "Ingredient(s), "May Contain", "Contain(s)"
+    String removedWordsText = text
+      .replaceAll(RegExp(r'\n'), ' ')
+      .replaceAll(RegExp(r'\bIngredient\b', caseSensitive: false), '')
+      .replaceAll(RegExp(r'\bIngredients\b', caseSensitive: false), '')
+      .replaceAll(RegExp(r'\bMay\s+contain\b', caseSensitive: false), '')
+      .replaceAll(RegExp(r'\bContains\b', caseSensitive: false), '')
+      .replaceAll(RegExp(r'\bContain\b', caseSensitive: false), '')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
+
+  List<String> ingredients = removedWordsText
+    .toLowerCase() // Convert the entire text to lowercase for uniformity
+    .replaceAllMapped(
+      // Special Case: Temporarily replace "natural and artificial flavouring/flavoring/flavors"
+      RegExp(r'natural and artificial'), // Match the specific phrase "natural and artificial"
+      (match) => 'natural_and_artificial' // Replace it with "natural_and_artificial" using underscores
+    )
+    .split(
+      // Split the text into individual ingredients
+      RegExp(
+          r'\s*(?:\band\b|\bor\b|[\(\)\[\],.!?:])\s*') // Remove "and", "or", and punctuation
+    )
+    .map((ingredient) => ingredient.trim()) // Trim whitespace from each ingredient
+    .where((ingredient) =>
+        ingredient.isNotEmpty && // Exclude empty strings resulting from split
+        ingredient.length > 1 && // Exclude single characters
+        ingredient != '/') // Exclude slashes (if ingredient says "and/or")
+    .map((ingredient) => 
+        ingredient.replaceAll('_', ' ') // Special Case: Revert "natural_and_artificial" back to "natural and artificial"
+    )
+    .toList(); // Convert Iterable back to a List
+
+
+  // Remove duplicate ingredients
+  ingredients = ingredients.toSet().toList();
+
+  // Map to keep track of which words belong to which ingredient
+  Map<String, List<String>> ingredientWordsMap = {};
+  List<String> allWords = [];
+
+  for (String ingredient in ingredients) {
+    String normalizedIngredient = normalizeAccents(ingredient); //Remove special accents from ingredients
+
+    // Extract words from ingredients
+    List<String> words = normalizedIngredient
+        .split(RegExp(r'[\s,]+'))
+        .map((word) => word.trim())
+        .toList();
+
+    ingredientWordsMap[ingredient] = words;
+    allWords.addAll(words);
+  }
+
+  int totalCount = allWords.where((word) {
+    String cleanedWord = removeWordPunctuation(word);
+    return cleanedWord.isNotEmpty && !RegExp(r'\d').hasMatch(cleanedWord);
+  }).length;
+
+  return {
+    'ingredients': ingredients,
+    'words': allWords,
+    'ingredientWordsMap': ingredientWordsMap,
+    'totalCount': totalCount,
+  };
+}
+
+
   Future<void> scanProduct(BuildContext context) async {
     // Navigate to the CameraScreen and get the captured image file
   final File? imageFile = await Navigator.of(context).push<File>(
-    MaterialPageRoute(builder: (context) => CameraScreen()),
+    MaterialPageRoute(builder: (context) => const CameraScreen()),
   );
 
   // User canceled the camera capture
   if (imageFile == null) {
     setState(() {
-      _isProcessingImage = false; // Stop processing
+      _isProcessingImage = false;
     });
-    showSnackBar(context,'Scanning successfully cancelled.');
+    showSnackBar(context, 'Scanning successfully cancelled.');
     return;
   }
-    // Set the state to show the loading indicator
-    setState(() {
-      _isProcessingImage = true;
-    });
 
-    // Crop the image
+  // Set the state to show the loading indicator
+  setState(() {
+    _isProcessingImage = true;
+  });
+
+  // Crop the image
   bool isCropConfirmed = await _cropImage(File(imageFile.path));
 
-  // User cancelled cropping
   if (!isCropConfirmed || _croppedFile == null) {
     setState(() {
-      _isProcessingImage = false; // Stop processing
+      _isProcessingImage = false;
     });
-    showSnackBar(context,'Scanning successfully cancelled.');
+    showSnackBar(context, 'Scanning successfully cancelled.');
     return;
   }
 
+  // Show ProcessingDialog
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) => ProcessingDialog(),
+  );
 
-    // Show ProcessingDialog
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => ProcessingDialog(),
-    );
+  final InputImage inputImage = InputImage.fromFilePath(_croppedFile!.path);
+  final textRecognizer = TextRecognizer();
+  final RecognizedText recognizedText =
+      await textRecognizer.processImage(inputImage);
 
-    final InputImage inputImage = InputImage.fromFilePath(_croppedFile!.path);
-    final textRecognizer = TextRecognizer();
-    final RecognizedText recognizedText =
-        await textRecognizer.processImage(inputImage);
+  print('Scanned Ingredients: ${recognizedText.text}');
 
-    // Print out all the ingredients that were scanned
-    print('Scanned Ingredients: ${recognizedText.text}');
+  Navigator.of(context).pop();
+  setState(() {
+    _isProcessingImage = false;
+  });
 
-    // Close ProcessingDialog
-    Navigator.of(context).pop();
-    setState(() {
-      _isProcessingImage = false; // Stop processing
-    });
+  setState(() {
+    _isProcessingImage = true;
+  });
+  
+  // parse ingredients to get... 
+  final normalizedData = normalizeIngredients(recognizedText.text);
+  int totalCount = normalizedData['totalCount'] as int; //...totalCount (for validation loading dialog)
+  List<String> ingredients = normalizedData['ingredients']; //...ingredients (for matching algorithm)
+  List<String> words = normalizedData['words']; //...words
 
-    //Continue showing CircularProgressIndicator for validationLoadingDialog
-    setState(() {
-      _isProcessingImage = true;
-    });
+  final progressStream = StreamController<int>();
 
-    // Remove newlines + extra spaces to create single continous block of text
-    // Remove Keywords: "Ingredient", "Ingredients", "Contains", "May Contain"
-    String combinedText = recognizedText.text
-        .replaceAll(RegExp(r'\n'), ' ')
-        .replaceAll(RegExp(r'\bIngredient\b', caseSensitive: false), '')
-        .replaceAll(RegExp(r'\bIngredients\b', caseSensitive: false), '')
-        .replaceAll(RegExp(r'\bMay\s+contain\b', caseSensitive: false), '')
-        .replaceAll(RegExp(r'\bContains\b', caseSensitive: false), '')
-        .replaceAll(RegExp(r'\bContain\b', caseSensitive: false), '')
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .trim(); // Remove extra spaces that may result from the above replacements
+  // Show validation loading dialog with pre-calculated total count
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) {
+      return ValidationLoadingDialog(
+        totalIngredients: totalCount,
+        progressStream: progressStream.stream,
+      );
+    },
+  );
 
-    print("!! Combined Text !!: $combinedText");
-
-    // Show ValidationLoadingDialog for validation
-    final progressStream = StreamController<int>();
-
-  // Create ingredients list using the same logic as validateIngredients
-      // Split ingredients list into ingredients (can contain multiple words) + cleanup
-  List<String> ingredients = combinedText
-    .toLowerCase()
-    .split(RegExp(
-        r'\s*(?:\band\b|\bor\b|[\(\)\[\],.!?:])\s*')) //v0.8.3 - Remove AND, OR, and COLON
-    .map((ingredient) => ingredient.trim())
-    .where((ingredient) =>
-        ingredient.isNotEmpty &&
-        ingredient.length > 1 && // Exclude single characters
-        ingredient != '/')     // Exclude slashes (if ingredient says "and/or")
-    .toList();
+  // Convert the list of ingredients to a single string to send to validateIngredients
+  final String ingredientsText = ingredients.join(', '); // Join ingredients with a comma separator
 
 
-    print('Pre-Duplicate Ingredients: $ingredients');
-
-    //Remove duplicate ingredients --> consolidate into 1 ingredient
-    ingredients = ingredients.toSet().toList();
-
-    print('POST-Duplicate Ingredients: $ingredients');
-
-    int totalCount = 0; //Number of words
-
-    //Create words list (from ingredients list) using same logic as validateIngredients
-    List<String> words = [];
-    for (String ingredient in ingredients) {
-      //Remove special accents from ingredients
-      String normalizedIngredient = normalizeAccents(ingredient);
-
-      //Extract words from ingredients
-      words = normalizedIngredient
-          .split(RegExp(r'[\s,]+'))
-          .map((word) => word.trim())
-          .toList();
-      for (String word in words) {
-        String normalizedWord = normalizeAccents(word);
-        String cleanedWord = removeWordPunctuation(normalizedWord.trim());
-
-        if (cleanedWord.isNotEmpty) {
-          if (RegExp(r'\d').hasMatch(cleanedWord)) {
-            print(
-                'Skipping word with digits: $cleanedWord'); // i.e. "B3" in Vitamin B3
-            continue;
-          }
-          totalCount++;
-        }
-      }
-      print('scanProduct() WORDS: $words'); //Debugging purposes
-    }
-
-    print("TOTAL COUNT scanProduct: $totalCount"); //Debugging purposes
-
-    // Show loading dialog
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return ValidationLoadingDialog(
-          totalIngredients: totalCount,
-          progressStream: progressStream.stream,
-        );
-      },
-    );
-
-    final validationResult = await validateIngredients(
-        context, combinedText, progressStream, totalCount);
+  //Validate Ingredients
+  final validationResult = await validateIngredients(context, ingredientsText, progressStream);
+  
+  //Catch return values
     bool isValidIngredients = validationResult['isValidIngredients'];
     double validityPercentage = validationResult['validityPercentage'];
     List<String> invalidAllergens = validationResult['invalidIngredients'];
+
+    //print("IMPORTED INGREDIENTS: $allIngredients");
+    //print("IMPORTED WORDS: $allWords");
+    //print("IMPORTED TOTALCOUNT: $totalCount2");
 
     // Close the StreamController
     progressStream.close();
@@ -395,58 +377,51 @@ class _HomeScreenState extends State<HomeScreen> {
     List<String> safeIngredients = [];
     bool isSafe = true;
 
-    if (combinedText.isNotEmpty) {
+    //NEW2 - concise matching logic
+
+    if (ingredients.isNotEmpty) {
+  print('scanProduct() INGREDIENTS: $ingredients');
+
+  for (String ingredient in ingredients) {
+    String cleanedIngredient = ingredient.trim();
+
+    // Exclude words with percentages and empty words
+    if (cleanedIngredient.isNotEmpty &&
+        !RegExp(r'\d+%').hasMatch(cleanedIngredient)) {
+      bool matchesAllergy = false;
       for (String allergy in allergies) {
+
+        //Check ingredient against single + plural versions of allergen
         String singular = Pluralize().singular(allergy);
         String plural = Pluralize().plural(allergy);
-        RegExp regexSingular = RegExp(r"\b" + RegExp.escape(singular) + r"\b",
-            caseSensitive: false);
-        RegExp regexPlural =
-            RegExp(r"\b" + RegExp.escape(plural) + r"\b", caseSensitive: false);
+        RegExp regexSingular = RegExp(r"\b" + RegExp.escape(singular) + r"\b", caseSensitive: false);
+        RegExp regexPlural = RegExp(r"\b" + RegExp.escape(plural) + r"\b", caseSensitive: false);
 
-        print('Checking: Singular: $singular, Plural: $plural');
+        print('[Checking: Singular]: $singular, [Plural: $plural] --> In [ingredient: $cleanedIngredient]');
 
-        if (regexSingular.hasMatch(combinedText) ||
-            regexPlural.hasMatch(combinedText)) {
-          print('MATCH FOUND: "$allergy"');
-          isSafe = false;
+        if (regexSingular.hasMatch(cleanedIngredient) ||
+            regexPlural.hasMatch(cleanedIngredient)) {
+          print('MATCH FOUND: "$allergy" in ingredient: "$cleanedIngredient"');
+          matchesAllergy = true;
+          isSafe = false; // Set isSafe to false if any match is found
           matchingAllergens.add(allergy);
+          break; // Stop checking other allergies if a match is found
         }
       }
-
-      print('scanProduct() INGREDIENTS: $ingredients');
-
-      for (String ingredient in ingredients) {
-        String cleanedIngredient = ingredient.trim();
-
-        // Exclude words with percentages and empty words
-        if (cleanedIngredient.isNotEmpty &&
-            !RegExp(r'\d+%').hasMatch(cleanedIngredient)) {
-          bool matchesAllergy = false;
-          for (String allergy in allergies) {
-            String singular = Pluralize().singular(allergy);
-            String plural = Pluralize().plural(allergy);
-            RegExp regexSingular = RegExp(
-                r"\b" + RegExp.escape(singular) + r"\b",
-                caseSensitive: false);
-            RegExp regexPlural = RegExp(r"\b" + RegExp.escape(plural) + r"\b",
-                caseSensitive: false);
-
-            if (regexSingular.hasMatch(cleanedIngredient) ||
-                regexPlural.hasMatch(cleanedIngredient)) {
-              matchesAllergy = true;
-              break;
-            }
-          }
-          if (!matchesAllergy &&
-              !invalidAllergens.contains(cleanedIngredient)) {
-            safeIngredients.add(cleanedIngredient);
-          }
-        }
+      
+      // If no allergies matched and the ingredient is not invalid, add it to safeIngredients
+      if (!matchesAllergy && !invalidAllergens.contains(cleanedIngredient)) {
+        safeIngredients.add(cleanedIngredient);
       }
-    } else {
-      isSafe = false;
     }
+  }
+} else {
+  isSafe = false; // Set isSafe to false if no ingredients are found
+}
+
+// Remove duplicates from matchingAllergens
+matchingAllergens = matchingAllergens.toSet().toList();
+
 
     //Debugging - array contents
     print('Matching Allergens: ${matchingAllergens.length}');
@@ -468,7 +443,8 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Center(
               child: Text(
-                combinedText.isNotEmpty
+                //NEW2 - combinedText.isNotEmpty
+                ingredients.isNotEmpty
                     ? (isSafe
                         ? 'The product is safe to eat!'
                         : 'The product contains allergens!')
@@ -500,7 +476,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
-            if (combinedText
+            if (ingredients //NEW2 - combinedText
                 .isNotEmpty) // //See Details shows for safe / unsafe products
               TextButton(
                 onPressed: () {
