@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Capitalizes the first letter of each word in a given string.
+// Capitalizes the first letter of each word in a given string.
 String capitalizeFirstLetter(String text) {
   if (text.isEmpty) return '';
   return text
@@ -10,14 +10,14 @@ String capitalizeFirstLetter(String text) {
       .join(' ');
 }
 
-/// Shows a SnackBar with the given [message] in the provided [context].
+// Shows a SnackBar with the given [message] in the provided [context].
 void showSnackBar(BuildContext context, String message) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
 }
 
-/// Shows a confirmation dialog with [title] and [content] text.
-/// If the user confirms, [onConfirm] will be executed.
-
+// Shows a confirmation dialog with [title] and [content] text.
+// If the user confirms, [onConfirm] will be executed.
+// Used in ManageAllergies for clearing all allergies (upper right trash can)
 Future<void> showConfirmationDialog(
   BuildContext context, {
   required String title,

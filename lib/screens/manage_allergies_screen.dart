@@ -10,18 +10,21 @@ class ManageAllergiesScreen extends StatefulWidget {
 }
 
 class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
+  // Text controller to manage input for adding allergens
   final TextEditingController _controller = TextEditingController();
-  static const int maxAllergies = 30;
-  String? _selectedGroupAllergen;
+  static const int maxAllergies = 30; // Max limit for number of allergies that can be added
+  String? _selectedGroupAllergen; // Stores the currently selected group allergen from dropdown
 
   @override
   void initState() {
     super.initState();
+    // Listener to update state whenever text input changes
     _controller.addListener(() {
       setState(() {});
     });
   }
 
+  // Dispose of the controller to free up resources
   @override
   void dispose() {
     _controller.dispose();
@@ -79,7 +82,7 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                           ...allergyProvider.treeNuts.map((treeNut) {
                             return allergyProvider.allergies.contains(treeNut)
                                 ? Padding(
-                                    padding: const EdgeInsets.only(left: 16.0),
+                                    padding: const EdgeInsets.only(left: 16.0), // Indent child item
                                     child: ListTile(
                                       title: Text(capitalizeFirstLetter(treeNut)), // Display capitalized tree nut
                                       trailing: IconButton(
@@ -110,7 +113,7 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                           ...allergyProvider.crustaceanShellfish.map((shellfish) {
                             return allergyProvider.allergies.contains(shellfish)
                                 ? Padding(
-                                    padding: const EdgeInsets.only(left: 16.0),
+                                    padding: const EdgeInsets.only(left: 16.0), // Indent child item
                                     child: ListTile(
                                       title: Text(capitalizeFirstLetter(shellfish)), // Display capitalized crust. shell.
                                       trailing: IconButton(
@@ -141,7 +144,7 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                           ...allergyProvider.fish.map((fish) {
                             return allergyProvider.allergies.contains(fish)
                                 ? Padding(
-                                    padding: const EdgeInsets.only(left: 16.0),
+                                    padding: const EdgeInsets.only(left: 16.0), // Indent child item
                                     child: ListTile(
                                       title: Text(capitalizeFirstLetter(fish)), // Display capitalized fish
                                       trailing: IconButton(
@@ -172,7 +175,7 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                           ...allergyProvider.legumes.map((legume) {
                             return allergyProvider.allergies.contains(legume)
                                 ? Padding(
-                                    padding: const EdgeInsets.only(left: 16.0),
+                                    padding: const EdgeInsets.only(left: 16.0), // Indent child item
                                     child: ListTile(
                                       title: Text(capitalizeFirstLetter(legume)), // Display capitalized legume
                                       trailing: IconButton(
