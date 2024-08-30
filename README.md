@@ -4,7 +4,7 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
-### [0.9.19] - 2024-08-30
+### [0.9.20] - 2024-08-30
 - BUG FIX
     1) Made Special Case where "and" is not removed in the phrase "Natural and Artificial"
         - (Note: This addresses note in v0.9.13)
@@ -14,6 +14,7 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
         - (2.c) Added method findMatches() - Made matching logic in scanProduct() it's own method
         - (2.d) Comments added + formatting
     3) Cleaned up unused dependencies in pubspec.yaml & unused methods in services/merriam_webster_service
+    4) CameraScreen - comments added + formatting
 
 - TO DO:
     1) Remove suggestions from merriam webster service (& string_similarity from pubspec.yaml)
