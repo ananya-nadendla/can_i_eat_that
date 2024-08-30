@@ -4,6 +4,20 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
+### [0.10.0] - 2024-08-30
+- MINOR FEATURE
+    - Created and imported app icon
+
+- TO DO:
+    1) (IMPORTANT) Check if dimension values are dynamic
+    3) UI Design
+    4) Web Version - Make
+
+    5) (Potential Idea) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
+    6) (Potential Idea) Adjustable Camera Viewfinder on live camera when taking photo 
+
+
+
 ### [0.9.21] - 2024-08-30
 - BUG FIX
     1) Made Special Case where "and" is not removed in the phrase "Natural and Artificial"
@@ -23,16 +37,6 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
         - Main.dart
         - CameraScreen
     6) ProcessingDialog & ValidationLoadingDialog - changed title messages to make more user friendly
-
-- TO DO:
-    1) (IMPORTANT) Check if dimension values are dynamic
-    2) Deal w/ unused variables (HomeScreen: isValidIngredients)
-    3) UI Design
-    4) Web Version - Make
-
-    5) (Potential Idea) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
-    6) (Potential Idea) Adjustable Camera Viewfinder on live camera when taking photo 
-
 
 ### [0.9.13] - 2024-08-29
 - BUG FIX

@@ -21,6 +21,7 @@ dependencies:
   crop_your_image: ^1.1.0
   camera: ^0.11.0+2
   permission_handler: ^11.3.1
+  flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:
   flutter_test:
@@ -30,6 +31,11 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # Add this section to include the .env file as an asset
   assets:
     - .env
+    - assets/app_icon.png
+
+flutter_launcher_icons:
+    android: true
+    ios: true
+    image_path: assets/app_icon.png # Path to your app icon image
