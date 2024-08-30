@@ -17,9 +17,9 @@ class CropScreen extends StatefulWidget {
 
 // State class for CropScreen
 class _CropScreenState extends State<CropScreen> {
-  late CropController
-      _cropController; // Controller instance for handling cropping operations
+  late CropController _cropController; // Controller instance for handling cropping operations
   bool _isCropping = false; // Flag to indicate if cropping is in progress
+  bool _isImageLoaded = false; // Flag to indicate if the image has been loaded
 
   @override
   void initState() {
@@ -32,7 +32,7 @@ class _CropScreenState extends State<CropScreen> {
     Navigator.of(context).pop(false);
   }
 
-  //Start cropping process
+  // Start cropping process
   void _startCropping() {
     setState(() {
       _isCropping = true; // Set cropping flag to true
@@ -43,7 +43,7 @@ class _CropScreenState extends State<CropScreen> {
   @override
   Widget build(BuildContext context) {
     // Fetch screen dimensions
-    final screenHeight = MediaQuery.of(context).size.height; //Get screen height
+    final screenHeight = MediaQuery.of(context).size.height; // Get screen height
     final bottomPadding = screenHeight * 0.05; // 5% of screen height
 
     return PopScope(
@@ -73,6 +73,13 @@ class _CropScreenState extends State<CropScreen> {
                         Navigator.of(context)
                             .pop(croppedData); // Return the cropped data
                       },
+                      onStatusChanged: (status) { 
+                        if (status == CropStatus.ready) { //Check if cropper has loaded in / is ready
+                          setState(() {
+                            _isImageLoaded = true; // Image is ready for cropping (Crop button now enabled)
+                          });
+                        }
+                      },
                     ),
                   ),
                 ),
@@ -100,9 +107,9 @@ class _CropScreenState extends State<CropScreen> {
                       ),
                       // Crop button
                       TextButton(
-                        onPressed: _isCropping
+                        onPressed: _isCropping || !_isImageLoaded
                             ? null
-                            : _startCropping, // Disable button while cropping is in progress
+                            : _startCropping, // Disable button while (1) cropping is in progress or (2) cropper/image didnt load in yet
                         child: const Text('Crop'),
                         style: TextButton.styleFrom(
                           foregroundColor: Colors.white,
@@ -118,7 +125,7 @@ class _CropScreenState extends State<CropScreen> {
                 const Padding(
                   padding: EdgeInsets.all(16), // Padding around the text
                   child: Text(
-                    'Crop the image to include only the ingredients you wish to scan.', //Message
+                    'Crop the image to include only the ingredients you wish to scan.', // Message
                     style: TextStyle(color: Colors.black),
                     softWrap: true, // Enable text wrapping
                     overflow:

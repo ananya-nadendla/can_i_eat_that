@@ -4,9 +4,12 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
-### [0.10.0] - 2024-08-30
+### [0.10.1] - 2024-08-30
 - MINOR FEATURE
     - Created and imported app icon
+
+- BUG FIX
+    - Disabled "Crop" button until crop_your_image widget loads in (in Crop Screen)
 
 - TO DO:
     1) (IMPORTANT) Check if dimension values are dynamic
