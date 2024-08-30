@@ -1,23 +1,22 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+//Packages
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:provider/provider.dart';
 import 'package:pluralize/pluralize.dart';
 import 'package:crop_your_image/crop_your_image.dart';
-
-import 'package:food_allergy_scanner/providers/allergy_provider.dart';
+//Screens
 import 'package:food_allergy_scanner/screens/manage_allergies_screen.dart';
 import 'package:food_allergy_scanner/screens/matching_allergens_screen.dart';
 import 'package:food_allergy_scanner/screens/crop_image_screen.dart';
 import 'package:food_allergy_scanner/screens/camera_screen.dart';
-
+//Other lib files
+import 'package:food_allergy_scanner/providers/allergy_provider.dart';
 import 'package:food_allergy_scanner/services/merriam_webster_service.dart';
 import 'package:food_allergy_scanner/widgets/processing_dialog_widget.dart';
 import 'package:food_allergy_scanner/widgets/validation_loading_dialog_widget.dart';
 import 'package:food_allergy_scanner/utils/utils.dart';
-
-//Removed ingredients/words/totalCount from being returned in validateIngredients, since normalizeIngredients already does so
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -25,16 +24,17 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool _isProcessingImage =
-      false; //Controls CircularProgressIndicator in Widget built
-  File? _croppedFile;
+  bool _isProcessingImage = false; //Controls CircularProgressIndicator in Widget build
+  File? _croppedFile; //Photo after cropping
   final CropController _cropController = CropController();
 
-
+  //Removes punctuation from a word
   String removeWordPunctuation(String text) {
-    return text.replaceAll(RegExp(r'[^\w\s-&]'), ''); //allow '&', '-' (for "fd&c", "semi-skimmed")
+    return text.replaceAll(
+        RegExp(r'[^\w\s-&]'), ''); //allow '&', '-' (for "fd&c", "semi-skimmed")
   }
 
+  //Replaces accents in words
   String normalizeAccents(String input) {
     return input
         .replaceAll(RegExp(r'[àáâãäå]', caseSensitive: false), 'a')
@@ -47,345 +47,353 @@ class _HomeScreenState extends State<HomeScreen> {
         .replaceAll(RegExp(r'[ß]', caseSensitive: false), 'ss');
   }
 
+  //Crops image and opens Crop Screen
   Future<bool> _cropImage(File imageFile) async {
-  final dynamic croppedData = await Navigator.of(context).push(
-    MaterialPageRoute(
-      builder: (context) => CropScreen(
-        imageFile: imageFile,
-        cropController: _cropController,
+    final dynamic croppedData = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => CropScreen(
+          imageFile: imageFile,
+          cropController: _cropController,
+        ),
       ),
-    ),
-  );
-
-  if (croppedData == null || croppedData is! List<int>) {
-    return false; // Indicate cropping was canceled or data is not valid
-  }
-
-  setState(() {
-    _croppedFile = File('${imageFile.path}_cropped.jpg');
-    _croppedFile!.writeAsBytesSync(croppedData);
-  });
-
-  return true; // Indicate cropping was confirmed
-}
-
-  Future<Map<String, dynamic>> validateIngredients(
-  BuildContext context,
-  String text,
-  StreamController<int> progressStream,
-  {
-    int batchSize = 5, //Api request batch size
-  }) async {
-  final merriamWebsterService = MerriamWebsterService();
-  final allergyProvider = Provider.of<AllergyProvider>(context, listen: false);
-  final predefinedValidWords = allergyProvider.predefinedValidWords;
-  bool isValidIngredients = true;
-  int validCount = 0;
-  int checkedCount = 0;
-
-  // Parse ingredients and words once --> next: validation
-  final normalizedData = normalizeIngredients(text);
-  final ingredients = normalizedData['ingredients'] as List<String>;
-  final allWords = normalizedData['words'] as List<String>;
-  final ingredientWordsMap = normalizedData['ingredientWordsMap'] as Map<String, List<String>>;
-  final totalCount = normalizedData['totalCount'] as int;
-
-  List<String> invalidIngredients = [];
-  List<String> toValidate = [];
-
-  print('validateIngredients() INGREDIENTS: $ingredients');
-
-  for (String word in allWords) {
-    String cleanedWord = removeWordPunctuation(word); // Remove punctuation from word
-
-    if (cleanedWord.isNotEmpty) {
-      // Special Case: Digits
-      if (RegExp(r'\d').hasMatch(cleanedWord)) {
-        print('Skipping word with digits: $cleanedWord'); // e.g., "B3" in Vitamin B3
-        continue;
-      }
-
-      // Special Case: Predefined valid words (i.e 'vit', 'fd&c', 'd&c')
-      if (predefinedValidWords.contains(cleanedWord.toLowerCase())) {
-        validCount++;
-        checkedCount++;
-        print('Skipping - PREDEFINED VALID ($validCount): $cleanedWord');
-        progressStream.add(checkedCount); // Update progress for each checked word
-        continue;
-      } else {
-        toValidate.add(cleanedWord); // Send word for validation
-      }
-    }
-  }
-
-  // Batch processing
-  for (int i = 0; i < toValidate.length; i += batchSize) {
-    final batch = toValidate.sublist(
-      i,
-      i + batchSize > toValidate.length ? toValidate.length : i + batchSize,
     );
 
-    List<Future<void>> validationFutures = batch.map((word) async {
-      checkedCount++;
-      print('Validating word ($checkedCount): $word');
-      bool isValid = await merriamWebsterService.isValidWord(word.toLowerCase());
+    if (croppedData == null || croppedData is! List<int>) {
+      return false; // Indicate cropping was canceled or data is not valid
+    }
 
-      if (isValid) {
-        //Ingredient is valid
-        validCount++;
-        print("WORD VALID!! ($validCount): $word");
-      } else {
-        isValidIngredients = false;
-        //Ingredient is invalid
-        print('WORD INVALID!! - Word not found in dictionary: [$word]');
+    setState(() {
+      _croppedFile = File('${imageFile.path}_cropped.jpg');
+      _croppedFile!.writeAsBytesSync(croppedData);
+    });
 
-        // Mark the entire ingredient as invalid
-        String? ingredient;
-        try {
-          ingredient = ingredientWordsMap.entries
-              .firstWhere((entry) => entry.value.contains(word))
-              .key;
-        } catch (e) {
-          ingredient = null; // Handle the case where the word is not found
-        }
-
-        if (ingredient != null && !invalidIngredients.contains(ingredient)) {
-          invalidIngredients.add(ingredient); //Add invalid ingredient to array
-        }
-      }
-      progressStream.add(checkedCount); // Update progress for each checked word
-    }).toList();
-
-    // Wait for the batch to complete before moving on
-    await Future.wait(validationFutures);
+    return true; // Indicate cropping was confirmed
   }
 
-  double validityPercentage = (validCount / totalCount) * 100;
-  print('Valid Count: $validCount, Total Count: $totalCount');
-  print('Validity Percentage: $validityPercentage%');
+  //Spellchecks ingredients against Merriam Webster Dictionary
+  Future<Map<String, dynamic>> validateIngredients(
+    BuildContext context,
+    String text,
+    StreamController<int> progressStream, {
+    int batchSize = 5, //Api request batch size
+  }) async {
 
-  return {
-    'isValidIngredients': isValidIngredients,
-    'validityPercentage': validityPercentage,
-    'invalidIngredients': invalidIngredients,
-  };
-}
+    final merriamWebsterService = MerriamWebsterService(); //Dictionary used to determine word validity 
+    final allergyProvider = Provider.of<AllergyProvider>(context, listen: false);
+    final predefinedValidWords = allergyProvider.predefinedValidWords;  //Words predefined as valid don't need to be checked against dictionary
 
-  
-  
-  Map<String, dynamic> normalizeIngredients(String text) {
-   
-    //Removes newlines from scanned text + "Ingredient(s), "May Contain", "Contain(s)"
-    String removedWordsText = text
-      .replaceAll(RegExp(r'\n'), ' ')
-      .replaceAll(RegExp(r'\bIngredient\b', caseSensitive: false), '')
-      .replaceAll(RegExp(r'\bIngredients\b', caseSensitive: false), '')
-      .replaceAll(RegExp(r'\bMay\s+contain\b', caseSensitive: false), '')
-      .replaceAll(RegExp(r'\bContains\b', caseSensitive: false), '')
-      .replaceAll(RegExp(r'\bContain\b', caseSensitive: false), '')
-      .replaceAll(RegExp(r'\s+'), ' ')
-      .trim();
+    bool isValidIngredients = true;
+    int validWordsCount = 0;
+    int checkedWordsCount = 0;
 
-  List<String> ingredients = removedWordsText
-    .toLowerCase() // Convert the entire text to lowercase for uniformity
-    .replaceAllMapped(
-      // Special Case: Temporarily replace "natural and artificial flavouring/flavoring/flavors"
-      RegExp(r'natural and artificial'), // Match the specific phrase "natural and artificial"
-      (match) => 'natural_and_artificial' // Replace it with "natural_and_artificial" using underscores
-    )
-    .split(
-      // Split the text into individual ingredients
-      RegExp(
-          r'\s*(?:\band\b|\bor\b|[\(\)\[\],.!?:])\s*') // Remove "and", "or", and punctuation
-    )
-    .map((ingredient) => ingredient.trim()) // Trim whitespace from each ingredient
-    .where((ingredient) =>
-        ingredient.isNotEmpty && // Exclude empty strings resulting from split
-        ingredient.length > 1 && // Exclude single characters
-        ingredient != '/') // Exclude slashes (if ingredient says "and/or")
-    .map((ingredient) => 
-        ingredient.replaceAll('_', ' ') // Special Case: Revert "natural_and_artificial" back to "natural and artificial"
-    )
-    .toList(); // Convert Iterable back to a List
+    // Get normalized ingredients and words
+    final normalizedData = normalizeIngredients(text);
+    final ingredients = normalizedData['ingredients'] as List<String>;
+    final allWords = normalizedData['words'] as List<String>;
+    final ingredientWordsMap = normalizedData['ingredientWordsMap'] as Map<String, List<String>>;
+    final totalCount = normalizedData['totalCount'] as int;
 
+    List<String> invalidIngredients = [];
+    List<String> toValidate = [];
 
-  // Remove duplicate ingredients
-  ingredients = ingredients.toSet().toList();
+    //Debugging
+    print('validateIngredients() INGREDIENTS: $ingredients');
 
-  // Map to keep track of which words belong to which ingredient
-  Map<String, List<String>> ingredientWordsMap = {};
-  List<String> allWords = [];
+    //Process & add words to validation list
+    for (String word in allWords) {
+      String cleanedWord =
+          removeWordPunctuation(word); // Remove punctuation from word
 
-  for (String ingredient in ingredients) {
-    String normalizedIngredient = normalizeAccents(ingredient); //Remove special accents from ingredients
-
-    // Extract words from ingredients
-    List<String> words = normalizedIngredient
-        .split(RegExp(r'[\s,]+'))
-        .map((word) => word.trim())
-        .toList();
-
-    ingredientWordsMap[ingredient] = words;
-    allWords.addAll(words);
-  }
-
-  int totalCount = allWords.where((word) {
-    String cleanedWord = removeWordPunctuation(word);
-    return cleanedWord.isNotEmpty && !RegExp(r'\d').hasMatch(cleanedWord);
-  }).length;
-
-  return {
-    'ingredients': ingredients,
-    'words': allWords,
-    'ingredientWordsMap': ingredientWordsMap,
-    'totalCount': totalCount,
-  };
-}
-
-Map<String, dynamic> findMatches(
-    List<String> ingredients,
-    List<String> allergies,
-    List<String> invalidIngredients) {
-  List<String> matchingAllergens = [];
-  List<String> safeIngredients = [];
-  bool isSafe = true;
-
-  if (ingredients.isNotEmpty) {
-    print('scanProduct()/findMatches() INGREDIENTS: $ingredients');
-
-    for (String ingredient in ingredients) {
-      String cleanedIngredient = ingredient.trim();
-
-      // Exclude words with percentages and empty words
-      if (cleanedIngredient.isNotEmpty &&
-          !RegExp(r'\d+%').hasMatch(cleanedIngredient)) {
-        bool matchesAllergy = false;
-        for (String allergy in allergies) {
-          // Check ingredient against single + plural versions of allergen
-          String singular = Pluralize().singular(allergy);
-          String plural = Pluralize().plural(allergy);
-          RegExp regexSingular = RegExp(r"\b" + RegExp.escape(singular) + r"\b", caseSensitive: false);
-          RegExp regexPlural = RegExp(r"\b" + RegExp.escape(plural) + r"\b", caseSensitive: false);
-
-          print('[Checking: Singular]: $singular, [Plural: $plural] --> In [ingredient: $cleanedIngredient]');
-
-          if (regexSingular.hasMatch(cleanedIngredient) ||
-              regexPlural.hasMatch(cleanedIngredient)) {
-            print('MATCH FOUND: "$allergy" in ingredient: "$cleanedIngredient"');
-            matchesAllergy = true;
-            isSafe = false; // Set isSafe to false if any match is found
-            matchingAllergens.add(allergy);
-            break; // Stop checking other allergies if a match is found
-          }
+      if (cleanedWord.isNotEmpty) {
+        // Special Case: Digits
+        if (RegExp(r'\d').hasMatch(cleanedWord)) {
+          print('Skipping word with digits: $cleanedWord'); // e.g., "B3" in Vitamin B3
+          continue;
         }
 
-        // If no allergies matched and the ingredient is not invalid, add it to safeIngredients
-        if (!matchesAllergy && !invalidIngredients.contains(cleanedIngredient)) {
-          safeIngredients.add(cleanedIngredient);
+        // Special Case: Predefined valid words (i.e 'vit', 'fd&c', 'd&c')
+        if (predefinedValidWords.contains(cleanedWord.toLowerCase())) {
+          validWordsCount++; //word marked as valid
+          checkedWordsCount++; //word marked as checked
+          print('Skipping - PREDEFINED VALID ($validWordsCount): $cleanedWord');
+          progressStream
+              .add(checkedWordsCount); // Update progress for each checked word
+          continue;
+        } else {
+          toValidate.add(cleanedWord); // Send word for validation
         }
       }
     }
-  } else {
-    isSafe = false; // Set isSafe to false if no ingredients are found
+
+    // Validate words against Merriam Webster Dictionary - Using Batch processing
+    for (int i = 0; i < toValidate.length; i += batchSize) {
+      final batch = toValidate.sublist(
+        i,
+        i + batchSize > toValidate.length ? toValidate.length : i + batchSize,
+      );
+
+      List<Future<void>> validationFutures = batch.map((word) async {
+        checkedWordsCount++;
+        print('Validating word ($checkedWordsCount): $word');
+        bool isValid =
+            await merriamWebsterService.isValidWord(word.toLowerCase());
+
+        if (isValid) {
+          //Ingredient is valid
+          validWordsCount++;
+          print("WORD VALID!! ($validWordsCount): $word");
+        } else {
+          isValidIngredients = false;
+          //Ingredient is invalid
+          print('WORD INVALID!! - Word not found in dictionary: [$word]');
+
+          // Mark the entire ingredient as invalid
+          String? ingredient;
+          try {
+            ingredient = ingredientWordsMap.entries
+                .firstWhere((entry) => entry.value.contains(word))
+                .key;
+          } catch (e) {
+            ingredient = null; // Handle the case where the word is not found
+          }
+
+          if (ingredient != null && !invalidIngredients.contains(ingredient)) {
+            invalidIngredients.add(ingredient); //Add invalid ingredient to array
+          }
+        }
+        progressStream.add(checkedWordsCount); // Update progress for each checked word
+      }).toList();
+
+      // Wait for the batch to complete before moving on
+      await Future.wait(validationFutures);
+    }
+
+    double validityPercentage = (validWordsCount / totalCount) * 100; //Threshold used to mark image as too blurry / too many typos
+    print('Valid Count: $validWordsCount, Total Count: $totalCount');
+    print('Validity Percentage: $validityPercentage%');
+
+    return {
+      'isValidIngredients': isValidIngredients,
+      'validityPercentage': validityPercentage,
+      'invalidIngredients': invalidIngredients,
+    };
   }
 
-  // Remove duplicates from matchingAllergens
-  matchingAllergens = matchingAllergens.toSet().toList();
+  //Normalizes scanned text
+  Map<String, dynamic> normalizeIngredients(String text) {
+    //Removes newlines from scanned text + "Ingredient(s), "May Contain", "Contain(s)"
+    String removedWordsText = text
+        .replaceAll(RegExp(r'\n'), ' ')
+        .replaceAll(RegExp(r'\bIngredient\b', caseSensitive: false), '')
+        .replaceAll(RegExp(r'\bIngredients\b', caseSensitive: false), '')
+        .replaceAll(RegExp(r'\bMay\s+contain\b', caseSensitive: false), '')
+        .replaceAll(RegExp(r'\bContains\b', caseSensitive: false), '')
+        .replaceAll(RegExp(r'\bContain\b', caseSensitive: false), '')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
 
-  return {
-    'matchingAllergens': matchingAllergens,
-    'safeIngredients': safeIngredients,
-    'isSafe': isSafe,
-  };
-}
+        List<String> ingredients = removedWordsText
+        .toLowerCase() // Convert the entire text to lowercase for uniformity
+        .replaceAllMapped(
+          // Special Case: Temporarily replace "natural and artificial flavouring/flavoring/flavors"
+          RegExp(r'natural and artificial'), // Match the specific phrase "natural and artificial"
+          (match) => 'natural_and_artificial' // Replace it with "natural_and_artificial" using underscores
+        )
+        .split(
+          // Split the text into individual ingredients
+          RegExp(
+              r'\s*(?:\band\b|\bor\b|[\(\)\[\],.!?:])\s*') // Remove "and", "or", and punctuation
+        )
+        .map((ingredient) => ingredient.trim()) // Trim whitespace from each ingredient
+        .where((ingredient) =>
+            ingredient.isNotEmpty && // Exclude empty strings resulting from split
+            ingredient.length > 1 && // Exclude single characters
+            ingredient != '/') // Exclude slashes (if ingredient says "and/or")
+        .map((ingredient) => 
+            ingredient.replaceAll('_', ' ') // Special Case: Revert "natural_and_artificial" back to "natural and artificial"
+        )
+        .toList(); // Convert Iterable back to a List
 
 
+    // Remove duplicate ingredients
+    ingredients = ingredients.toSet().toList();
+
+    // Map to keep track of which words belong to which ingredient
+    Map<String, List<String>> ingredientWordsMap = {};
+    List<String> allWords = [];
+
+    for (String ingredient in ingredients) {
+      //Remove special accents from words (for word validation purposes)
+      String normalizedIngredient = normalizeAccents(ingredient);
+
+      // Extract words from ingredients (i.e "Citric", "Acid" extracted from "Citric Acid")
+      List<String> words = normalizedIngredient
+          .split(RegExp(r'[\s,]+'))
+          .map((word) => word.trim())
+          .toList();
+
+      ingredientWordsMap[ingredient] = words;
+      allWords.addAll(words);
+    }
+
+    //Calculate number of words
+    int totalCount = allWords.where((word) {
+      String cleanedWord = removeWordPunctuation(word);
+      return cleanedWord.isNotEmpty && !RegExp(r'\d').hasMatch(cleanedWord);
+    }).length;
+
+    return {
+      'ingredients': ingredients,
+      'words': allWords,
+      'ingredientWordsMap': ingredientWordsMap,
+      'totalCount': totalCount,
+    };
+  }
+
+  //Finds matches between user's allergens and scanned ingredients
+  Map<String, dynamic> findMatches(List<String> ingredients, List<String> allergies, List<String> invalidIngredients) {
+   
+    List<String> matchingAllergens = []; //List of allergens found in ingredients
+    List<String> safeIngredients = []; //List of safe ingredients
+    bool isSafe = true; //Marks if food product is safe
+
+    if (ingredients.isNotEmpty) {
+ 
+      print('scanProduct()/findMatches() INGREDIENTS: $ingredients'); //Debugging
+
+      for (String ingredient in ingredients) {
+        String cleanedIngredient = ingredient.trim();
+
+        // Exclude words with percentages (i.e 7%) and empty words
+        if (cleanedIngredient.isNotEmpty && !RegExp(r'\d+%').hasMatch(cleanedIngredient)) {
+          bool matchesAllergy = false;
+
+          for (String allergy in allergies) {
+            // Check ingredient against single + plural versions of allergen
+            String singular = Pluralize().singular(allergy);
+            String plural = Pluralize().plural(allergy);
+            RegExp regexSingular = RegExp(r"\b" + RegExp.escape(singular) + r"\b", caseSensitive: false);
+            RegExp regexPlural = RegExp(r"\b" + RegExp.escape(plural) + r"\b", caseSensitive: false);
+
+            //Debugging
+            print('[Checking: Singular]: $singular, [Plural: $plural] --> In [ingredient: $cleanedIngredient]');
+
+            //Check for matches
+            if (regexSingular.hasMatch(cleanedIngredient) || regexPlural.hasMatch(cleanedIngredient)) {
+              print('MATCH FOUND: "$allergy" in ingredient: "$cleanedIngredient"');
+              matchesAllergy = true;
+              isSafe = false; // Set isSafe to false if any match is found
+              matchingAllergens.add(allergy); //add allergy to list
+              break; // Stop checking other allergies if a match is found
+            }
+          }
+
+          // If no allergies matched and the ingredient is not invalid, add it to safeIngredients
+          if (!matchesAllergy &&
+              !invalidIngredients.contains(cleanedIngredient)) {
+            safeIngredients.add(cleanedIngredient);
+          }
+        }
+      }
+    } else {
+      isSafe = false; // Set isSafe to false if no ingredients are found
+    }
+
+    // Remove duplicates from matchingAllergens
+    matchingAllergens = matchingAllergens.toSet().toList();
+
+    return {
+      'matchingAllergens': matchingAllergens,
+      'safeIngredients': safeIngredients,
+      'isSafe': isSafe,
+    };
+  }
+
+  //Handles overall product scanning (from taking photo to showing scan results)
   Future<void> scanProduct(BuildContext context) async {
     // Navigate to the CameraScreen and get the captured image file
-  final File? imageFile = await Navigator.of(context).push<File>(
-    MaterialPageRoute(builder: (context) => const CameraScreen()),
-  );
+    final File? imageFile = await Navigator.of(context).push<File>(
+      MaterialPageRoute(builder: (context) => const CameraScreen()),
+    );
 
-  // User canceled the camera capture
-  if (imageFile == null) {
+    // User canceled the camera capture
+    if (imageFile == null) {
+      setState(() {
+        _isProcessingImage = false;
+      });
+      showSnackBar(context, 'Scanning successfully cancelled.');
+      return; //return to HomeScreen
+    }
+
+    // Set the state to show the loading indicator
+    setState(() {
+      _isProcessingImage = true;
+    });
+
+    // Crop the image
+    bool isCropConfirmed = await _cropImage(File(imageFile.path));
+
+    //User cancelled cropping
+    if (!isCropConfirmed || _croppedFile == null) {
+      setState(() {
+        _isProcessingImage = false;
+      });
+      showSnackBar(context, 'Scanning successfully cancelled.');
+      return; //return to HomeScreen
+    }
+
+    // Show ProcessingDialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => ProcessingDialog(),
+    );
+
+    //Text Recognition - Grab text from image
+    final InputImage inputImage = InputImage.fromFilePath(_croppedFile!.path);
+    final textRecognizer = TextRecognizer();
+    final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
+
+    //Debugging - print raw ingredients
+    print('Scanned Ingredients: ${recognizedText.text}');
+
+    Navigator.of(context).pop();
+
     setState(() {
       _isProcessingImage = false;
     });
-    showSnackBar(context, 'Scanning successfully cancelled.');
-    return;
-  }
-
-  // Set the state to show the loading indicator
-  setState(() {
-    _isProcessingImage = true;
-  });
-
-  // Crop the image
-  bool isCropConfirmed = await _cropImage(File(imageFile.path));
-
-  if (!isCropConfirmed || _croppedFile == null) {
     setState(() {
-      _isProcessingImage = false;
+      _isProcessingImage = true;
     });
-    showSnackBar(context, 'Scanning successfully cancelled.');
-    return;
-  }
 
-  // Show ProcessingDialog
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (context) => ProcessingDialog(),
-  );
+    // Normalize ingredients to get...
+    final normalizedData = normalizeIngredients(recognizedText.text);
+    int totalCount = normalizedData['totalCount'] as int; //...totalCount (for validation loading dialog)
+    List<String> ingredients = normalizedData['ingredients']; //...ingredients (for matching algorithm: findMatches())
 
-  final InputImage inputImage = InputImage.fromFilePath(_croppedFile!.path);
-  final textRecognizer = TextRecognizer();
-  final RecognizedText recognizedText =
-      await textRecognizer.processImage(inputImage);
+    final progressStream = StreamController<int>();
 
-  print('Scanned Ingredients: ${recognizedText.text}');
+    // Show validation loading dialog with pre-calculated total count
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return ValidationLoadingDialog(
+          totalIngredients: totalCount,
+          progressStream: progressStream.stream,
+        );
+      },
+    );
 
-  Navigator.of(context).pop();
-  setState(() {
-    _isProcessingImage = false;
-  });
+    // Convert the list of ingredients to a single string to send to validateIngredients
+    final String ingredientsText = ingredients.join(', '); // Join ingredients with a comma separator
 
-  setState(() {
-    _isProcessingImage = true;
-  });
-  
-  // parse ingredients to get... 
-  final normalizedData = normalizeIngredients(recognizedText.text);
-  int totalCount = normalizedData['totalCount'] as int; //...totalCount (for validation loading dialog)
-  List<String> ingredients = normalizedData['ingredients']; //...ingredients (for matching algorithm)
-  List<String> words = normalizedData['words']; //...words
+    //Validate Ingredients
+    final validationResult = await validateIngredients(context, ingredientsText, progressStream);
 
-  final progressStream = StreamController<int>();
-
-  // Show validation loading dialog with pre-calculated total count
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (context) {
-      return ValidationLoadingDialog(
-        totalIngredients: totalCount,
-        progressStream: progressStream.stream,
-      );
-    },
-  );
-
-  // Convert the list of ingredients to a single string to send to validateIngredients
-  final String ingredientsText = ingredients.join(', '); // Join ingredients with a comma separator
-
-
-  //Validate Ingredients
-  final validationResult = await validateIngredients(context, ingredientsText, progressStream);
-  
-   //Catch return values
-    bool isValidIngredients = validationResult['isValidIngredients'];
-    double validityPercentage = validationResult['validityPercentage'];
+    //Catch return values
+    double validityPercentage = validationResult['validityPercentage']; //Used to mark image as too blurry / too many typos
     List<String> invalidIngredients = validationResult['invalidIngredients'];
-
 
     // Close the StreamController
     progressStream.close();
@@ -397,6 +405,7 @@ Map<String, dynamic> findMatches(
     });
 
     if (validityPercentage < 90) {
+      //Most ingredients were not valid - show AlertDialog
       print('Invalid ingredients scanned');
       textRecognizer.close();
       showDialog(
@@ -408,7 +417,7 @@ Map<String, dynamic> findMatches(
             children: [
               Center(
                 child: Text(
-                  'Photo unclear or label contains many typos. Please try again.',
+                  'Photo unclear or label contains many typos. Please try again.', //Tell user to retake photo
                 ),
               ),
             ],
@@ -424,17 +433,17 @@ Map<String, dynamic> findMatches(
       return;
     }
 
-    AllergyProvider allergyProvider =
-        Provider.of<AllergyProvider>(context, listen: false);
+    //Get list of allergies from allergy_provider
+    AllergyProvider allergyProvider = Provider.of<AllergyProvider>(context, listen: false);
     List<String> allergies = allergyProvider.allergies;
 
     // Find matches between allergens and ingredients
     final result = findMatches(ingredients, allergies, invalidIngredients);
+
     //Capture returned data
     List<String> matchingAllergens = result['matchingAllergens'];
     List<String> safeIngredients = result['safeIngredients'];
     bool isSafe = result['isSafe'];
-
 
     //Debugging - array contents
     print('Matching Allergens: ${matchingAllergens.length}');
@@ -446,6 +455,7 @@ Map<String, dynamic> findMatches(
     print('Safe Ingredients: ${safeIngredients.length}');
     print(safeIngredients);
 
+    //Show results of scan
     textRecognizer.close();
     showDialog(
       context: context,
@@ -456,7 +466,6 @@ Map<String, dynamic> findMatches(
           children: [
             Center(
               child: Text(
-                //NEW2 - combinedText.isNotEmpty
                 ingredients.isNotEmpty
                     ? (isSafe
                         ? 'The product is safe to eat!'
@@ -464,7 +473,10 @@ Map<String, dynamic> findMatches(
                     : 'No text was recognized!',
               ),
             ),
-            if (validityPercentage >= 90 && validityPercentage < 100)
+            if (validityPercentage >= 90 &&
+                validityPercentage <
+                    100) //Most (but not all) ingredients are valid
+              //Show warning label
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Container(
@@ -489,8 +501,8 @@ Map<String, dynamic> findMatches(
                   ),
                 ),
               ),
-            if (ingredients //NEW2 - combinedText
-                .isNotEmpty) // //See Details shows for safe / unsafe products
+            if (ingredients
+                .isNotEmpty) //See Details shows detailed scan results for safe / unsafe products
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
@@ -519,6 +531,7 @@ Map<String, dynamic> findMatches(
     );
   }
 
+  //Opens ManageAllergiesScreen()
   void manageAllergies(BuildContext context) {
     Navigator.push(
       context,
@@ -537,12 +550,12 @@ Map<String, dynamic> findMatches(
           bool hasAllergies = allergyProvider.allergies.isNotEmpty;
           return Center(
             child: _isProcessingImage
-                ? const CircularProgressIndicator() // v0.8.9 - loading indicator. Starts from image capture, Ends at Scan Results
+                ? const CircularProgressIndicator() // Loading indicator. Starts from image capture, Ends at Scan Results
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       const Text(
-                        'Scan a product to check for allergens!',
+                        'Scan a product to check for allergens!', //Instructions on HomeScreen
                         style: TextStyle(fontSize: 20),
                       ),
                       const SizedBox(height: 20),
@@ -551,14 +564,14 @@ Map<String, dynamic> findMatches(
                             ? () => scanProduct(context)
                             : () {
                                 showSnackBar(context,
-                                    'Please add at least one allergen before scanning.');
+                                    'Please add at least one allergen before scanning.'); //If no allergens were added when user hit "Scan Product"
                               },
-                        child: const Text('Scan Product'),
+                        child: const Text('Scan Product'), //Scan Product button
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
-                        onPressed: () => manageAllergies(context),
-                        child: const Text('Manage Allergies'),
+                        onPressed: () => manageAllergies(context), //method that opens Manage Allergens Screen
+                        child: const Text('Manage Allergies'), //Manage Allergies button
                       ),
                     ],
                   ),

@@ -4,7 +4,7 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
-### [0.9.17] - 2024-08-30
+### [0.9.18] - 2024-08-30
 - BUG FIX
     1) Made Special Case where "and" is not removed in the phrase "Natural and Artificial"
         - (Note: This addresses note in v0.9.13)
@@ -12,6 +12,7 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
         - (2.a) Added method normalizeIngredients() - removed redundant ingredient normalization in scanProduct() and validateIngredients()
         - (2.b) Updated scanProduct() matching logic to be less redundant
         - (2.c) Added method findMatches() - Made matching logic in scanProduct() it's own method
+        - (2.d) Comments added + formatting
 
 - TO DO:
     1) (IMPORTANT) Check if dimension values are dynamic
