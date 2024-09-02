@@ -30,6 +30,7 @@ class _CropScreenState extends State<CropScreen> {
   // Indicate cropping was canceled
   void _cancelCrop() {
     Navigator.of(context).pop(false);
+    widget.imageFile.deleteSync(); // Delete image file 
   }
 
   // Start cropping process

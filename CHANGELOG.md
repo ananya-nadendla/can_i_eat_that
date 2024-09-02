@@ -1,6 +1,6 @@
 ## Version Information
 
-### [0.12.3] - 2024-09-02
+### [0.12.5] - 2024-09-02
 - MINOR UPDATE
     1) Renamed project from "Food Allergy Scanner" (food_allergy_scanner) to "Can I Eat That" (can_i_eat_that)
 
@@ -8,6 +8,19 @@
     1) Put Version Information in a CHANGELOG.md
     2) README - Wrote section on : App Installation from GitHub
     3) Removed unused "Themes" Folder and "themes/app_theme.dart" (ThemeData is in main.dart)
+    4) Image Deletion occurs on...
+        - Camera Screen: 
+            - Camera capturing error
+            - Image Retake
+            - Image Cancellation
+        - Crop Screen
+            - Cropping Cancellation
+        - Home Screen
+            - Result: "Photo is unclear"
+            - Result: "Product is safe to eat"
+            - Result: "Product contains allergens"
+            - Result: "No text recognized"
+    5) Added Privacy Policy (for image deletion) in README
 
 - TO DO:
     1) README: Add app demo / screenshots

@@ -71,3 +71,15 @@ This project uses an environment file (`.env`) to store API Keys for security pu
 
    # Your Merriam-Webster Medical API Key
    API_KEY_MERRIAM_WEBSTER_MEDICAL_DICTIONARY=your_actual_medical_api_key
+
+## Privacy Statement
+
+### Image Privacy
+
+Privacy is important. The `can_i_eat_that` app takes your images of ingredient labels solely for the purpose of identifying allergens. 
+
+- **Temporary Storage:** Images are temporarily stored only during the scanning process. They are used to process and analyze ingredient labels and are not retained beyond this process. Images are not stored or saved long-term. 
+
+- **Third-Party Sharing:** 
+   - Our app uses the **Google ML Kit** for image processing and analysis. Images are sent to Google ML Kit APIs to perform necessary tasks such as text recognition.
+   - **Google’s Privacy Practices**: We do not control how Google handles the data. Please refer to Google’s Privacy Policy for details on how your data is managed and protected.

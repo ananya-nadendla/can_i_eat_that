@@ -448,11 +448,17 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              imageFile.delete(); // Delete the image file after use
+              if (_croppedFile != null) {
+                _croppedFile!.delete(); // Delete the cropped image file after use
+              }
+            },
+            child: const Text('OK'),
+          ),
+        ],
         ),
       );
       return;
@@ -562,7 +568,13 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () {
+              Navigator.of(context).pop();
+              imageFile.delete(); // Delete the image file after use
+              if (_croppedFile != null) {
+                _croppedFile!.delete(); // Delete the cropped image file after use
+              }
+            },
             child: const Text('OK'),
           ),
         ],

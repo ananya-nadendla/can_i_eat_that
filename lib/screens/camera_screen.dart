@@ -102,20 +102,30 @@ class _CameraScreenState extends State<CameraScreen> {
           _capturedImage = File(image.path); // Store the captured image
         });
       } catch (e) {
-        print(e); // Handle and log any errors during image capture
+        print('Error capturing image: $e'); // Handle and log any errors during image capture
+        _resetCamera(); // Ensure the image file is deleted on error
       }
     }
   }
 
-  // Clear the captured image
-  void _resetCamera() {
-    setState(() {
-      _capturedImage = null;
-    });
+  // Clear the captured image to let user re-take image
+  void _resetCamera() async {
+    if (_capturedImage != null) {
+      try {
+        await _capturedImage!.delete(); // Delete the image file
+        print('Photo deleted.');
+      } catch (e) {
+        print('Error deleting image: $e'); // Handle and log any errors during image deletion
+      }
+      setState(() {
+        _capturedImage = null;
+      });
+    }
   }
 
   // Cancel the image capture
   void _cancelCameraCapture() {
+    _resetCamera(); // Ensure the image file is deleted on cancel
     Navigator.of(context).pop(null); // Return null to HomeScreen to indicate cancellation
   }
 
@@ -217,7 +227,7 @@ class _CameraScreenState extends State<CameraScreen> {
             
             // Camera Message Section
             Padding(
-              padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02), // Vertical Padding  - 2% of screen height
+              padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02), // Vertical Padding - 2% of screen height
               child: const Text(
                 'Take a photo of an ingredients label. \n Up Next: Crop your photo!', // Message
                 style: TextStyle(
