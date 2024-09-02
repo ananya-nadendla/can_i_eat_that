@@ -1,12 +1,13 @@
 ## Version Information
 
-### [0.12.2] - 2024-09-02
+### [0.12.3] - 2024-09-02
 - MINOR UPDATE
     1) Renamed project from "Food Allergy Scanner" (food_allergy_scanner) to "Can I Eat That" (can_i_eat_that)
 
 - BUG FIX
     1) Put Version Information in a CHANGELOG.md
     2) README - Wrote section on : App Installation from GitHub
+    3) Removed unused "Themes" Folder and "themes/app_theme.dart" (ThemeData is in main.dart)
 
 - TO DO:
     1) README: Add app demo / screenshots
