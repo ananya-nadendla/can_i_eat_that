@@ -38,7 +38,7 @@ class _CameraScreenState extends State<CameraScreen> {
     try {
       final cameras = await availableCameras(); // Get the list of available cameras
       _selectedCamera = cameras.firstWhere(
-        (camera) => camera.lensDirection == CameraLensDirection.back, //Use back camera
+        (camera) => camera.lensDirection == CameraLensDirection.back, // Use back camera
         orElse: () => cameras.first, // Fallback to the first available camera if back camera is not found
       );
 
@@ -92,7 +92,7 @@ class _CameraScreenState extends State<CameraScreen> {
     );
   }
 
-  //Captures image using camera
+  // Captures image using camera
   Future<void> _captureImage() async {
     if (_controller != null) {
       try {
@@ -114,7 +114,7 @@ class _CameraScreenState extends State<CameraScreen> {
     });
   }
 
-  // Cancel the image capture 
+  // Cancel the image capture
   void _cancelCameraCapture() {
     Navigator.of(context).pop(null); // Return null to HomeScreen to indicate cancellation
   }
@@ -139,7 +139,7 @@ class _CameraScreenState extends State<CameraScreen> {
       canPop: false, // Prevent back navigation
       child: Scaffold(
         appBar: AppBar(
-          title: const Center( //Center title
+          title: const Center( // Center title
             child: Text('Capture Photo'),
           ),
           automaticallyImplyLeading: false, // Remove the default back arrow
@@ -168,38 +168,30 @@ class _CameraScreenState extends State<CameraScreen> {
                       }
                     },
                   ),
-                  
-                  // Camera Buttons Section
-                  if (_capturedImage == null)
-                    Positioned(
-                      bottom: bottomPadding,
-                      left: 0,
-                      right: 0,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          GestureDetector(
-                            onTap: _captureImage, // Capture image on button tap
-                            child: Container(
-                              width: buttonSize,
-                              height: buttonSize,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.red,
-                                border: Border.all(width: buttonSize * 0.07, color: const Color.fromARGB(255, 90, 6, 100)), // Button border - 7% of button size
-                              ),
-                            ),
+                ],
+              ),
+            ),
+            
+            // Camera Buttons Section
+            Padding(
+              padding: EdgeInsets.only(bottom: bottomPadding), // Padding from bottom
+              child: Align(
+                alignment: Alignment.center,
+                child: _capturedImage == null
+                    ? GestureDetector(
+                        onTap: _captureImage, // Capture image on button tap
+                        child: Container(
+                          width: buttonSize,
+                          height: buttonSize,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.red,
+                            border: Border.all(width: buttonSize * 0.07, color: const Color.fromARGB(255, 90, 6, 100)), // Button border - 7% of button size
                           ),
-                        ],
-                      ),
-                    )
-                  else
-                    Positioned(
-                      bottom: bottomPadding,
-                      left: 0,
-                      right: 0,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Distribute buttons evenly
                         children: [
                           IconButton(
                             icon: const Icon(Icons.close, color: Colors.red), // Cancel button
@@ -220,26 +212,21 @@ class _CameraScreenState extends State<CameraScreen> {
                           ),
                         ],
                       ),
-                    ),
-                ],
               ),
             ),
             
             // Camera Message Section
-            Align(
-              alignment: Alignment.bottomCenter, // Center the text at the bottom
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02), // Vertical Padding - 2% of screen height
-                child: const Text(
-                  'Take a photo of an ingredients label. \n Up Next: Crop your photo!', // Message
-                  style: TextStyle(
-                    color: Color.fromARGB(255, 90, 6, 100), // Text color
-                    fontWeight: FontWeight.bold, 
-                  ),
-                  softWrap: true,
-                  overflow: TextOverflow.visible,
-                  textAlign: TextAlign.center,
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02), // Vertical Padding  - 2% of screen height
+              child: const Text(
+                'Take a photo of an ingredients label. \n Up Next: Crop your photo!', // Message
+                style: TextStyle(
+                  color: Color.fromARGB(255, 90, 6, 100), // Text color
+                  fontWeight: FontWeight.bold, 
                 ),
+                softWrap: true,
+                overflow: TextOverflow.visible,
+                textAlign: TextAlign.center, // Center the text at the bottom
               ),
             ),
           ],

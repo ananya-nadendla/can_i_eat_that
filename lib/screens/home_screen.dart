@@ -487,76 +487,78 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Center(child: Text('Scan Result')),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Center(
-              child: Text(
-                ingredients.isNotEmpty
-                    ? (isSafe
-                        ? 'The product is safe to eat!'
-                        : 'The product contains allergens!')
-                    : 'No text was recognized!',
-                style: TextStyle(
-                  color: ingredients.isNotEmpty
+        content: SingleChildScrollView( // Scrollview (if alertdialog is too long)
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Text(
+                  ingredients.isNotEmpty
                       ? (isSafe
-                          ? const Color.fromARGB(
-                              255, 90, 6, 100) // "Safe to eat" msg text color
-                          : Colors.red) // "Contains allergens" msg text color
-                      : const Color.fromARGB(255, 90, 6,
-                          100), // "No text recognized" msg text color
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            if (validityPercentage >= 90 &&
-                validityPercentage <
-                    100) // Most (but not all) ingredients are valid
-              // Show warning label
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Container(
-                  padding: const EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                    color: Colors.orange[200],
-                    borderRadius: BorderRadius.circular(8.0),
+                          ? 'The product is safe to eat!'
+                          : 'The product contains allergens!')
+                      : 'No text was recognized!',
+                  style: TextStyle(
+                    color: ingredients.isNotEmpty
+                        ? (isSafe
+                            ? const Color.fromARGB(
+                                255, 90, 6, 100) // "Safe to eat" msg text color
+                            : Colors.red) // "Contains allergens" msg text color
+                        : const Color.fromARGB(255, 90, 6,
+                            100), // "No text recognized" msg text color
                   ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.warning, color: Colors.orange),
-                      SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Some ingredients were not recognized due to typos or an unclear photo. Visit "See Details" for more information.',
-                          style:
-                              TextStyle(color: Color.fromARGB(255, 205, 73, 1)),
-                          textAlign: TextAlign.center,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              if (validityPercentage >= 90 &&
+                  validityPercentage <
+                      100) // Most (but not all) ingredients are valid
+                // Show warning label
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Container(
+                    padding: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      color: Colors.orange[200],
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.warning, color: Colors.orange),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Some ingredients were not recognized due to typos or an unclear photo. Visit "See Details" for more information.',
+                            style:
+                                TextStyle(color: Color.fromARGB(255, 205, 73, 1)),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              if (ingredients
+                  .isNotEmpty) // See Details shows detailed scan results for safe / unsafe products
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MatchingAllergensScreen(
+                          matchingAllergens: matchingAllergens,
+                          invalidIngredients: invalidIngredients,
+                          safeIngredients: safeIngredients,
                         ),
                       ),
-                    ],
-                  ),
+                    );
+                  },
+                  child: const Text('See Details'),
                 ),
-              ),
-            if (ingredients
-                .isNotEmpty) // See Details shows detailed scan results for safe / unsafe products
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => MatchingAllergensScreen(
-                        matchingAllergens: matchingAllergens,
-                        invalidIngredients: invalidIngredients,
-                        safeIngredients: safeIngredients,
-                      ),
-                    ),
-                  );
-                },
-                child: const Text('See Details'),
-              ),
-          ],
+            ],
+          ),
         ),
         actions: [
           TextButton(

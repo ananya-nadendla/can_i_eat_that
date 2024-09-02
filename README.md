@@ -4,7 +4,14 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
-### [0.11.0]
+### [0.11.3] - 2024-09-02
+- BUG FIX
+    1) Home Screen - Fixed "Scan Result" dialog overflow issue when phone = landscape mode
+    2) Camera Screen - fixed button formatting when phone = landscape mode
+    3) AndroidManifest.xml - Locked phone in portrait mode
+        - Note: Added updates to landscape mode, then locked app in portrait mode, so that UI is responsive to different phone sizes in all/extreme cases.
+
+### [0.11.0] - 2024-09-01
 - MINOR FEATURE (APP UI)
     1) Cohesive color palette across all screens using ThemeData in main.dart
     2) Centered all Screen Titles
@@ -21,11 +28,6 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
         - Manually added theme colors for readability
     5) Camera Screen
         - Turned camera button red & purple
-
-- TO DO:
-    1) (IMPORTANT) Check if dimension values are dynamic
-    2) Overflow errors (when tilting phone)
-        - Dialog that says "This product is safe to eat!" + "Some Ingredients were not recognized" --> Overflow error
 
 ### [0.10.1] - 2024-08-30
 - MINOR FEATURE
@@ -138,13 +140,6 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
         - Colons 
         - "And"
         - "Or"
-
-- TO DO:
-    1) (Potential Idea) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
-    2) (Potential Idea) Adjustable Camera Viewfinder when taking photo 
-    3) UI Design
-    4) Deal with frames skipping warning
-    5) Move common methods to a utils.dart
 
 ### [0.8.1] - 2024-08-20
 - MINOR FEATURE
