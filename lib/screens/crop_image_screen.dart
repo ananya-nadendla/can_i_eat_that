@@ -50,7 +50,9 @@ class _CropScreenState extends State<CropScreen> {
       canPop: false, // Prevent back navigation
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Crop Photo'),
+          title: const Center( //Center title
+            child: Text('Crop Photo'),
+          ),
           automaticallyImplyLeading: false, // Remove the default back arrow
         ),
         body: Stack(
@@ -61,12 +63,10 @@ class _CropScreenState extends State<CropScreen> {
                 Expanded(
                   // Expands cropper widget to fill available space
                   child: Padding(
-                    padding: const EdgeInsets.all(
-                        16.0), // Add padding around cropper widget to avoid the edges - prevents back gesture on some phones
+                    padding: const EdgeInsets.all(16.0), // Add padding around cropper widget to avoid the edges - prevents back gesture on some phones
                     child: Crop(
                       // Crop widget from crop_your_image package
-                      image: File(widget.imageFile.path)
-                          .readAsBytesSync(), // Load image data
+                      image: File(widget.imageFile.path).readAsBytesSync(), // Load image data
                       controller: _cropController, // Assign crop controller
                       onCropped: (croppedData) {
                         // Callback after cropping is done
@@ -121,16 +121,21 @@ class _CropScreenState extends State<CropScreen> {
                   ),
                 ),
 
-                // Cropping Message Section
-                const Padding(
-                  padding: EdgeInsets.all(16), // Padding around the text
-                  child: Text(
-                    'Crop the image to include only the ingredients you wish to scan.', // Message
-                    style: TextStyle(color: Colors.black),
-                    softWrap: true, // Enable text wrapping
-                    overflow:
-                        TextOverflow.visible, // Allow text overflow if needed
-                    textAlign: TextAlign.center,
+                Align(
+                  alignment: Alignment.bottomCenter, // Center the text at the bottom
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02), // Vertical Padding - 2% of screen height
+                    child: const Text(
+                      'Crop the image to include only the ingredients you wish to scan.', // Message
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 90, 6, 100), // Text color
+                        fontWeight: FontWeight.bold, 
+                      ),
+                      softWrap: true,
+                      overflow: TextOverflow.visible,
+                      textAlign: TextAlign.center,
+                    ),
+
                   ),
                 ),
               ],

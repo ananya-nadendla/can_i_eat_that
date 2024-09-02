@@ -211,8 +211,9 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                   },
                 ),
               ),
-              Padding(
+              Container(
                 padding: const EdgeInsets.all(8.0), // Padding around the input row
+                color: const Color.fromARGB(255, 247, 244, 191), // Background color for the input and dropdown area
                 child: Column(
                   children: [
                     Row(
@@ -220,13 +221,44 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                         Expanded(
                           child: TextField(
                             controller: _controller, // Controller for text input
+                            style: const TextStyle(
+                              color: Color.fromARGB(255, 90, 6, 100), // Purple color for text input
+                            ),
                             decoration: const InputDecoration(
                               labelText: 'Input Single Allergen', // Input field label
+                              labelStyle: TextStyle(
+                                color: Color.fromARGB(255, 90, 6, 100), // Purple color for label
+                                fontWeight: FontWeight.bold,
+                              ),
+                              filled: true, // Ensures the background color is filled
+                              fillColor: Color.fromARGB(255, 247, 244, 191), // Background color for the TextField
+                              border: OutlineInputBorder(),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Color.fromARGB(255, 90, 6, 100), // Purple color for focused border
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Color.fromARGB(255, 90, 6, 100), // Purple color for enabled border
+                                ),
+                              ),
                             ),
-                          ),
+                            cursorColor: const Color.fromARGB(255, 90, 6, 100), // Purple cursor color
+                          )
                         ),
                         IconButton(
-                          icon: const Icon(Icons.add), // Add icon button
+                          icon: Container(
+                            padding: const EdgeInsets.all(4.0), // Add padding to create space between the icon and the circle
+                            decoration: const BoxDecoration(
+                              color: Color.fromARGB(255, 101, 156, 103), // Green background
+                              shape: BoxShape.circle, // Circle shape
+                            ),
+                            child: const Icon(
+                              Icons.add, //Plus icon
+                              color: Color.fromARGB(255, 255, 253, 208), // Cream color for the plus sign
+                            ),
+                          ),
                           onPressed: () {
                             String newAllergy = _controller.text
                                 .trim()
@@ -257,11 +289,31 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 8.0), // Small space between the TextField and DropdownButtonFormField
                     Row(
                       children: [
                         Expanded(
-                          child: DropdownButton<String>(
-                            hint: const Text('Select Group Allergen'), // Dropdown hint text
+                          child: DropdownButtonFormField<String>(
+                            decoration: const InputDecoration(
+                              filled: true, // Ensures the background color is filled
+                              fillColor: Color.fromARGB(255, 247, 244, 191), // Background color for the DropdownButton
+                              labelText: 'Select Group Allergen',
+                              labelStyle: TextStyle(
+                                color: Color.fromARGB(255, 90, 6, 100), // Purple color for label
+                                fontWeight: FontWeight.bold, // Bold text
+                              ),
+                              border: OutlineInputBorder(),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Color.fromARGB(255, 90, 6, 100), // Purple color for focused border
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Color.fromARGB(255, 90, 6, 100), // Purple color for enabled border
+                                ),
+                              ),
+                            ),
                             value: _selectedGroupAllergen, // Selected group allergen value
                             onChanged: (String? value) {
                               setState(() {
@@ -276,13 +328,30 @@ class _ManageAllergiesScreenState extends State<ManageAllergiesScreen> {
                             ].map<DropdownMenuItem<String>>((String value) {
                               return DropdownMenuItem<String>(
                                 value: value,
-                                child: Text(value), // Display dropdown item
+                                child: Text(
+                                  value, // Display dropdown item
+                                  style: TextStyle(
+                                    color: _selectedGroupAllergen == value
+                                        ? const Color.fromARGB(255, 90, 6, 100) // Purple color for selected item
+                                        : const Color.fromARGB(255, 255, 253, 208), // Cream color for unselected items
+                                  ),
+                                ),
                               );
                             }).toList(),
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.add),  // Add icon button
+                          icon: Container(
+                            padding: const EdgeInsets.all(4.0), // Add padding to create space between the icon and the circle
+                            decoration: const BoxDecoration(
+                              color: Color.fromARGB(255, 101, 156, 103), // Green background
+                              shape: BoxShape.circle, // Circle shape
+                            ),
+                            child: const Icon(
+                              Icons.add, //Plus icon
+                              color: Color.fromARGB(255, 255, 253, 208), // Cream color for the plus sign
+                            ),
+                          ), // Add icon button
                           onPressed: () {
                             if (_selectedGroupAllergen != null) { // Check if a group allergen is selected
                               int totalAllergies = allergyProvider.allergies.length; // Total current allergies count

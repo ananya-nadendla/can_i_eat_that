@@ -4,22 +4,35 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Version Information
 
+### [0.11.0]
+- MINOR FEATURE (APP UI)
+    1) Cohesive color palette across all screens using ThemeData in main.dart
+    2) Centered all Screen Titles
+    2) Home Screen
+        - Added image of person with magnifying glass
+    3) Manage Allergies Screen 
+        - Modified "add allergen" plus sign icons to have circle behind it
+        - Made both input fields uniform
+        - Added rectangle around both input fields
+        - Cursor (when typing in Text Field) is purple
+        - All appbar icons (back arrow, clear all trash) is same color (cream)
+        - Background color behind input fields is darker than that of allergen list
+    4) Processing Dialog / Validation Loading Dialog
+        - Manually added theme colors for readability
+    5) Camera Screen
+        - Turned camera button red & purple
+
+- TO DO:
+    1) (IMPORTANT) Check if dimension values are dynamic
+    2) Overflow errors (when tilting phone)
+        - Dialog that says "This product is safe to eat!" + "Some Ingredients were not recognized" --> Overflow error
+
 ### [0.10.1] - 2024-08-30
 - MINOR FEATURE
     - Created and imported app icon
 
 - BUG FIX
     - Disabled "Crop" button until crop_your_image widget loads in (in Crop Screen)
-
-- TO DO:
-    1) (IMPORTANT) Check if dimension values are dynamic
-    3) UI Design
-    4) Web Version - Make
-
-    5) (Potential Idea) Invalid word suggestions --> how to handle them? (Replace automatically, ask the user to choose, etc)
-    6) (Potential Idea) Adjustable Camera Viewfinder on live camera when taking photo 
-
-
 
 ### [0.9.21] - 2024-08-30
 - BUG FIX

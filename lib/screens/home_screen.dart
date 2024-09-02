@@ -24,7 +24,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool _isProcessingImage = false; //Controls CircularProgressIndicator in Widget build
+  bool _isProcessingImage =
+      false; //Controls CircularProgressIndicator in Widget build
   File? _croppedFile; //Photo after cropping
   final CropController _cropController = CropController();
 
@@ -77,10 +78,12 @@ class _HomeScreenState extends State<HomeScreen> {
     StreamController<int> progressStream, {
     int batchSize = 5, //Api request batch size
   }) async {
-
-    final merriamWebsterService = MerriamWebsterService(); //Dictionary used to determine word validity 
-    final allergyProvider = Provider.of<AllergyProvider>(context, listen: false);
-    final predefinedValidWords = allergyProvider.predefinedValidWords;  //Words predefined as valid don't need to be checked against dictionary
+    final merriamWebsterService =
+        MerriamWebsterService(); //Dictionary used to determine word validity
+    final allergyProvider =
+        Provider.of<AllergyProvider>(context, listen: false);
+    final predefinedValidWords = allergyProvider
+        .predefinedValidWords; //Words predefined as valid don't need to be checked against dictionary
 
     bool isValidIngredients = true;
     int validWordsCount = 0;
@@ -90,7 +93,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final normalizedData = normalizeIngredients(text);
     final ingredients = normalizedData['ingredients'] as List<String>;
     final allWords = normalizedData['words'] as List<String>;
-    final ingredientWordsMap = normalizedData['ingredientWordsMap'] as Map<String, List<String>>;
+    final ingredientWordsMap =
+        normalizedData['ingredientWordsMap'] as Map<String, List<String>>;
     final totalCount = normalizedData['totalCount'] as int;
 
     List<String> invalidIngredients = [];
@@ -107,7 +111,8 @@ class _HomeScreenState extends State<HomeScreen> {
       if (cleanedWord.isNotEmpty) {
         // Special Case: Digits
         if (RegExp(r'\d').hasMatch(cleanedWord)) {
-          print('Skipping word with digits: $cleanedWord'); // e.g., "B3" in Vitamin B3
+          print(
+              'Skipping word with digits: $cleanedWord'); // e.g., "B3" in Vitamin B3
           continue;
         }
 
@@ -158,17 +163,20 @@ class _HomeScreenState extends State<HomeScreen> {
           }
 
           if (ingredient != null && !invalidIngredients.contains(ingredient)) {
-            invalidIngredients.add(ingredient); //Add invalid ingredient to array
+            invalidIngredients
+                .add(ingredient); //Add invalid ingredient to array
           }
         }
-        progressStream.add(checkedWordsCount); // Update progress for each checked word
+        progressStream
+            .add(checkedWordsCount); // Update progress for each checked word
       }).toList();
 
       // Wait for the batch to complete before moving on
       await Future.wait(validationFutures);
     }
 
-    double validityPercentage = (validWordsCount / totalCount) * 100; //Threshold used to mark image as too blurry / too many typos
+    double validityPercentage = (validWordsCount / totalCount) *
+        100; //Threshold used to mark image as too blurry / too many typos
     print('Valid Count: $validWordsCount, Total Count: $totalCount');
     print('Validity Percentage: $validityPercentage%');
 
@@ -192,28 +200,31 @@ class _HomeScreenState extends State<HomeScreen> {
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
 
-        List<String> ingredients = removedWordsText
+    List<String> ingredients = removedWordsText
         .toLowerCase() // Convert the entire text to lowercase for uniformity
         .replaceAllMapped(
-          // Special Case: Temporarily replace "natural and artificial flavouring/flavoring/flavors"
-          RegExp(r'natural and artificial'), // Match the specific phrase "natural and artificial"
-          (match) => 'natural_and_artificial' // Replace it with "natural_and_artificial" using underscores
-        )
+            // Special Case: Temporarily replace "natural and artificial flavouring/flavoring/flavors"
+            RegExp(
+                r'natural and artificial'), // Match the specific phrase "natural and artificial"
+            (match) =>
+                'natural_and_artificial' // Replace it with "natural_and_artificial" using underscores
+            )
         .split(
-          // Split the text into individual ingredients
-          RegExp(
-              r'\s*(?:\band\b|\bor\b|[\(\)\[\],.!?:])\s*') // Remove "and", "or", and punctuation
-        )
-        .map((ingredient) => ingredient.trim()) // Trim whitespace from each ingredient
+            // Split the text into individual ingredients
+            RegExp(
+                r'\s*(?:\band\b|\bor\b|[\(\)\[\],.!?:])\s*') // Remove "and", "or", and punctuation
+            )
+        .map((ingredient) =>
+            ingredient.trim()) // Trim whitespace from each ingredient
         .where((ingredient) =>
-            ingredient.isNotEmpty && // Exclude empty strings resulting from split
+            ingredient
+                .isNotEmpty && // Exclude empty strings resulting from split
             ingredient.length > 1 && // Exclude single characters
             ingredient != '/') // Exclude slashes (if ingredient says "and/or")
-        .map((ingredient) => 
-            ingredient.replaceAll('_', ' ') // Special Case: Revert "natural_and_artificial" back to "natural and artificial"
-        )
+        .map((ingredient) => ingredient.replaceAll('_',
+                ' ') // Special Case: Revert "natural_and_artificial" back to "natural and artificial"
+            )
         .toList(); // Convert Iterable back to a List
-
 
     // Remove duplicate ingredients
     ingredients = ingredients.toSet().toList();
@@ -251,36 +262,44 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   //Finds matches between user's allergens and scanned ingredients
-  Map<String, dynamic> findMatches(List<String> ingredients, List<String> allergies, List<String> invalidIngredients) {
-   
-    List<String> matchingAllergens = []; //List of allergens found in ingredients
+  Map<String, dynamic> findMatches(List<String> ingredients,
+      List<String> allergies, List<String> invalidIngredients) {
+    List<String> matchingAllergens =
+        []; //List of allergens found in ingredients
     List<String> safeIngredients = []; //List of safe ingredients
     bool isSafe = true; //Marks if food product is safe
 
     if (ingredients.isNotEmpty) {
- 
-      print('scanProduct()/findMatches() INGREDIENTS: $ingredients'); //Debugging
+      print(
+          'scanProduct()/findMatches() INGREDIENTS: $ingredients'); //Debugging
 
       for (String ingredient in ingredients) {
         String cleanedIngredient = ingredient.trim();
 
         // Exclude words with percentages (i.e 7%) and empty words
-        if (cleanedIngredient.isNotEmpty && !RegExp(r'\d+%').hasMatch(cleanedIngredient)) {
+        if (cleanedIngredient.isNotEmpty &&
+            !RegExp(r'\d+%').hasMatch(cleanedIngredient)) {
           bool matchesAllergy = false;
 
           for (String allergy in allergies) {
             // Check ingredient against single + plural versions of allergen
             String singular = Pluralize().singular(allergy);
             String plural = Pluralize().plural(allergy);
-            RegExp regexSingular = RegExp(r"\b" + RegExp.escape(singular) + r"\b", caseSensitive: false);
-            RegExp regexPlural = RegExp(r"\b" + RegExp.escape(plural) + r"\b", caseSensitive: false);
+            RegExp regexSingular = RegExp(
+                r"\b" + RegExp.escape(singular) + r"\b",
+                caseSensitive: false);
+            RegExp regexPlural = RegExp(r"\b" + RegExp.escape(plural) + r"\b",
+                caseSensitive: false);
 
             //Debugging
-            print('[Checking: Singular]: $singular, [Plural: $plural] --> In [ingredient: $cleanedIngredient]');
+            print(
+                '[Checking: Singular]: $singular, [Plural: $plural] --> In [ingredient: $cleanedIngredient]');
 
             //Check for matches
-            if (regexSingular.hasMatch(cleanedIngredient) || regexPlural.hasMatch(cleanedIngredient)) {
-              print('MATCH FOUND: "$allergy" in ingredient: "$cleanedIngredient"');
+            if (regexSingular.hasMatch(cleanedIngredient) ||
+                regexPlural.hasMatch(cleanedIngredient)) {
+              print(
+                  'MATCH FOUND: "$allergy" in ingredient: "$cleanedIngredient"');
               matchesAllergy = true;
               isSafe = false; // Set isSafe to false if any match is found
               matchingAllergens.add(allergy); //add allergy to list
@@ -352,7 +371,8 @@ class _HomeScreenState extends State<HomeScreen> {
     //Text Recognition - Grab text from image
     final InputImage inputImage = InputImage.fromFilePath(_croppedFile!.path);
     final textRecognizer = TextRecognizer();
-    final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
+    final RecognizedText recognizedText =
+        await textRecognizer.processImage(inputImage);
 
     //Debugging - print raw ingredients
     print('Scanned Ingredients: ${recognizedText.text}');
@@ -368,8 +388,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Normalize ingredients to get...
     final normalizedData = normalizeIngredients(recognizedText.text);
-    int totalCount = normalizedData['totalCount'] as int; //...totalCount (for validation loading dialog)
-    List<String> ingredients = normalizedData['ingredients']; //...ingredients (for matching algorithm: findMatches())
+    int totalCount = normalizedData['totalCount']
+        as int; //...totalCount (for validation loading dialog)
+    List<String> ingredients = normalizedData[
+        'ingredients']; //...ingredients (for matching algorithm: findMatches())
 
     final progressStream = StreamController<int>();
 
@@ -386,13 +408,16 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     // Convert the list of ingredients to a single string to send to validateIngredients
-    final String ingredientsText = ingredients.join(', '); // Join ingredients with a comma separator
+    final String ingredientsText =
+        ingredients.join(', '); // Join ingredients with a comma separator
 
     //Validate Ingredients
-    final validationResult = await validateIngredients(context, ingredientsText, progressStream);
+    final validationResult =
+        await validateIngredients(context, ingredientsText, progressStream);
 
     //Catch return values
-    double validityPercentage = validationResult['validityPercentage']; //Used to mark image as too blurry / too many typos
+    double validityPercentage = validationResult[
+        'validityPercentage']; //Used to mark image as too blurry / too many typos
     List<String> invalidIngredients = validationResult['invalidIngredients'];
 
     // Close the StreamController
@@ -434,7 +459,8 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     //Get list of allergies from allergy_provider
-    AllergyProvider allergyProvider = Provider.of<AllergyProvider>(context, listen: false);
+    AllergyProvider allergyProvider =
+        Provider.of<AllergyProvider>(context, listen: false);
     List<String> allergies = allergyProvider.allergies;
 
     // Find matches between allergens and ingredients
@@ -471,18 +497,28 @@ class _HomeScreenState extends State<HomeScreen> {
                         ? 'The product is safe to eat!'
                         : 'The product contains allergens!')
                     : 'No text was recognized!',
+                style: TextStyle(
+                  color: ingredients.isNotEmpty
+                      ? (isSafe
+                          ? const Color.fromARGB(
+                              255, 90, 6, 100) // "Safe to eat" msg text color
+                          : Colors.red) // "Contains allergens" msg text color
+                      : const Color.fromARGB(255, 90, 6,
+                          100), // "No text recognized" msg text color
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
             if (validityPercentage >= 90 &&
                 validityPercentage <
-                    100) //Most (but not all) ingredients are valid
-              //Show warning label
+                    100) // Most (but not all) ingredients are valid
+              // Show warning label
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Container(
                   padding: const EdgeInsets.all(8.0),
                   decoration: BoxDecoration(
-                    color: Colors.yellow[100],
+                    color: Colors.orange[200],
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   child: const Row(
@@ -493,7 +529,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       Expanded(
                         child: Text(
                           'Some ingredients were not recognized due to typos or an unclear photo. Visit "See Details" for more information.',
-                          style: TextStyle(color: Colors.orange),
+                          style:
+                              TextStyle(color: Color.fromARGB(255, 205, 73, 1)),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -502,7 +539,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             if (ingredients
-                .isNotEmpty) //See Details shows detailed scan results for safe / unsafe products
+                .isNotEmpty) // See Details shows detailed scan results for safe / unsafe products
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
@@ -541,9 +578,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Get the screen size
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Food Allergy Scanner'),
+        title: const Center(
+          //Center Title
+          child: Text('Food Allergy Scanner'),
+        ),
+        automaticallyImplyLeading: false, // Remove the default back arrow
       ),
       body: Consumer<AllergyProvider>(
         builder: (context, allergyProvider, child) {
@@ -554,9 +598,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      const Text(
-                        'Scan a product to check for allergens!', //Instructions on HomeScreen
-                        style: TextStyle(fontSize: 20),
+                      // Image widget
+                      Image.asset(
+                        'assets/magnifying_glass_dude.png',
+                        height: size.height * 0.2, // 20% of screen height
+                        width: size.width * 0.4, // 40% of screen width
+                        fit: BoxFit.contain, // Ensures image isn't cut off
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 16.0), // Adds padding to left and right
+                        child: Text(
+                          'Scan a product to check for allergens!', // Instructions on HomeScreen
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold, // Make text bold
+                          ),
+                          textAlign: TextAlign.center, // Center text
+                        ),
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
@@ -564,14 +623,17 @@ class _HomeScreenState extends State<HomeScreen> {
                             ? () => scanProduct(context)
                             : () {
                                 showSnackBar(context,
-                                    'Please add at least one allergen before scanning.'); //If no allergens were added when user hit "Scan Product"
+                                    'Please add at least one allergen before scanning.'); // If no allergens were added when user hit "Scan Product"
                               },
-                        child: const Text('Scan Product'), //Scan Product button
+                        child:
+                            const Text('Scan Product'), // Scan Product button
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
-                        onPressed: () => manageAllergies(context), //method that opens Manage Allergens Screen
-                        child: const Text('Manage Allergies'), //Manage Allergies button
+                        onPressed: () => manageAllergies(
+                            context), // Method that opens Manage Allergens Screen
+                        child: const Text(
+                            'Manage Allergies'), // Manage Allergies button
                       ),
                     ],
                   ),

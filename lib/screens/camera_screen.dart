@@ -139,7 +139,9 @@ class _CameraScreenState extends State<CameraScreen> {
       canPop: false, // Prevent back navigation
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Capture Photo'),
+          title: const Center( //Center title
+            child: Text('Capture Photo'),
+          ),
           automaticallyImplyLeading: false, // Remove the default back arrow
         ),
         body: Column(
@@ -183,8 +185,8 @@ class _CameraScreenState extends State<CameraScreen> {
                               height: buttonSize,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.white,
-                                border: Border.all(width: buttonSize * 0.07, color: Colors.black), // Button border - 7% of button size
+                                color: Colors.red,
+                                border: Border.all(width: buttonSize * 0.07, color: const Color.fromARGB(255, 90, 6, 100)), // Button border - 7% of button size
                               ),
                             ),
                           ),
@@ -229,8 +231,11 @@ class _CameraScreenState extends State<CameraScreen> {
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02), // Vertical Padding - 2% of screen height
                 child: const Text(
-                  'Take a photo of an ingredients label. \n Up Next: Crop your photo', //Message
-                  style: TextStyle(color: Colors.black),
+                  'Take a photo of an ingredients label. \n Up Next: Crop your photo!', // Message
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 90, 6, 100), // Text color
+                    fontWeight: FontWeight.bold, 
+                  ),
                   softWrap: true,
                   overflow: TextOverflow.visible,
                   textAlign: TextAlign.center,

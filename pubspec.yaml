@@ -33,9 +33,10 @@ flutter:
 
   assets:
     - .env
-    - assets/app_icon.png
+    - assets/app_icon.png #App icon
+    - assets/magnifying_glass_dude.png #Used in HomeScreen
 
 flutter_launcher_icons:
     android: true
     ios: true
-    image_path: assets/app_icon.png # Path to your app icon image
+    image_path: assets/app_icon.png #App icon 
