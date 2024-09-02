@@ -11,6 +11,14 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
     3) AndroidManifest.xml - Locked phone in portrait mode
         - Note: Added updates to landscape mode, then locked app in portrait mode, so that UI is responsive to different phone sizes in all/extreme cases.
 
+- TO DO:
+    1) Neaten debugging print statements + replace with loggers
+    2) README
+        - Put version information in a CHANGELOG.md
+        - Write section on : App Installation from Github
+        - Add screenshots
+    3) Rename app & github repo to "Can I Eat That"
+
 ### [0.11.0] - 2024-09-01
 - MINOR FEATURE (APP UI)
     1) Cohesive color palette across all screens using ThemeData in main.dart
