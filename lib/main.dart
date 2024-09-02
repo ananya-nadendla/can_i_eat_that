@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:food_allergy_scanner/providers/allergy_provider.dart';
-import 'package:food_allergy_scanner/screens/home_screen.dart';
+import 'package:can_i_eat_that/providers/allergy_provider.dart';
+import 'package:can_i_eat_that/screens/home_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
                 AllergyProvider()), // Provider for managing allergies
       ],
       child: MaterialApp(
-        title: 'Food Allergy Scanner', // App title
+        title: 'Can I Eat That', // App title
         theme: ThemeData(
           primaryColor: const Color.fromARGB(255, 29, 87, 31), // Primary color
           scaffoldBackgroundColor: const Color.fromARGB(255, 255, 253, 208), // Background color for the scaffold

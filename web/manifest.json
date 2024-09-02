@@ -1,6 +1,6 @@
 {
-    "name": "food_allergy_scanner",
-    "short_name": "food_allergy_scanner",
+    "name": "can_i_eat_that",
+    "short_name": "can_i_eat_that",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

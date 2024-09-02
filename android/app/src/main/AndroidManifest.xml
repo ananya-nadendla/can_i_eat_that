@@ -2,7 +2,7 @@
     <uses-permission android:name="android.permission.CAMERA"/>  <!-- Camera permissions-->
 
     <application
-        android:label="food_allergy_scanner"
+        android:label="Can I Eat That"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 

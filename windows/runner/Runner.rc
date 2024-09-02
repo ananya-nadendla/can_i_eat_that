@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "food_allergy_scanner" "\0"
+            VALUE "FileDescription", "can_i_eat_that" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "food_allergy_scanner" "\0"
+            VALUE "InternalName", "can_i_eat_that" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2024 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "food_allergy_scanner.exe" "\0"
-            VALUE "ProductName", "food_allergy_scanner" "\0"
+            VALUE "OriginalFilename", "can_i_eat_that.exe" "\0"
+            VALUE "ProductName", "can_i_eat_that" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

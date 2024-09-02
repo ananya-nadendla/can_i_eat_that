@@ -7,16 +7,16 @@ import 'package:provider/provider.dart';
 import 'package:pluralize/pluralize.dart';
 import 'package:crop_your_image/crop_your_image.dart';
 //Screens
-import 'package:food_allergy_scanner/screens/manage_allergies_screen.dart';
-import 'package:food_allergy_scanner/screens/matching_allergens_screen.dart';
-import 'package:food_allergy_scanner/screens/crop_image_screen.dart';
-import 'package:food_allergy_scanner/screens/camera_screen.dart';
+import 'package:can_i_eat_that/screens/manage_allergies_screen.dart';
+import 'package:can_i_eat_that/screens/matching_allergens_screen.dart';
+import 'package:can_i_eat_that/screens/crop_image_screen.dart';
+import 'package:can_i_eat_that/screens/camera_screen.dart';
 //Other lib files
-import 'package:food_allergy_scanner/providers/allergy_provider.dart';
-import 'package:food_allergy_scanner/services/merriam_webster_service.dart';
-import 'package:food_allergy_scanner/widgets/processing_dialog_widget.dart';
-import 'package:food_allergy_scanner/widgets/validation_loading_dialog_widget.dart';
-import 'package:food_allergy_scanner/utils/utils.dart';
+import 'package:can_i_eat_that/providers/allergy_provider.dart';
+import 'package:can_i_eat_that/services/merriam_webster_service.dart';
+import 'package:can_i_eat_that/widgets/processing_dialog_widget.dart';
+import 'package:can_i_eat_that/widgets/validation_loading_dialog_widget.dart';
+import 'package:can_i_eat_that/utils/utils.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -587,7 +587,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Center(
           //Center Title
-          child: Text('Food Allergy Scanner'),
+          child: Text('Can I Eat That'),
         ),
         automaticallyImplyLeading: false, // Remove the default back arrow
       ),

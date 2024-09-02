@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:food_allergy_scanner/utils/utils.dart';
+import 'package:can_i_eat_that/utils/utils.dart';
 
 class MatchingAllergensScreen extends StatelessWidget {
   final List<String> matchingAllergens; // List of matching allergens

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pluralize/pluralize.dart';
-import 'package:food_allergy_scanner/providers/allergy_provider.dart';
-import 'package:food_allergy_scanner/utils/utils.dart';
+import 'package:can_i_eat_that/providers/allergy_provider.dart';
+import 'package:can_i_eat_that/utils/utils.dart';
 
 class ManageAllergiesScreen extends StatefulWidget {
   @override
