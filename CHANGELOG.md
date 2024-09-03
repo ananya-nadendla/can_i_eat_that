@@ -1,6 +1,6 @@
 ## Version Information
 
-### [0.12.5] - 2024-09-02
+### [0.12.6] - 2024-09-02
 - MINOR UPDATE
     1) Renamed project from "Food Allergy Scanner" (food_allergy_scanner) to "Can I Eat That" (can_i_eat_that)
 
@@ -21,6 +21,7 @@
             - Result: "Product contains allergens"
             - Result: "No text recognized"
     5) Added Privacy Policy (for image deletion) in README
+    6) README - Added app screenshots
 
 - TO DO:
     1) README: Add app demo / screenshots
@@ -33,6 +34,8 @@
     2) Camera Screen - fixed button formatting when phone = landscape mode
     3) AndroidManifest.xml - Locked phone in portrait mode
         - Note: Added updates to landscape mode, then locked app in portrait mode, so that UI is responsive to different phone sizes in all/extreme cases.
+    4) (IMPORTANT) Figure out how to run in release mode (update kotlin)
+
 
 ### [0.11.0] - 2024-09-01
 - MINOR FEATURE (APP UI)
