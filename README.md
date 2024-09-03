@@ -15,7 +15,7 @@ Here are some screenshots demonstrating different features of the app in order o
 
 | **Home Screen Demo** | **Manage Allergies Screen** | **Capture Image Demo** | **Crop Image Demo** | **Processing Demo** | **Analyzing Demo** | **Scan Results Demo** | **Matching Allergens Screen** |
 |----------------------|-----------------------------|------------------------|----------------------|---------------------|---------------------|------------------------|-------------------------------|
-| <img src="assets/screens/home_screen_demo.JPG" width="200" /> | <img src="assets/screens/manage_allergies_screen.JPG" width="200" /> | <img src="assets/screens/capture_image_demo.JPG" width="200" /> | <img src="assets/screens/crop_image_demo.JPG" width="200" /> | <img src="assets/screens/processing_demo.JPG" width="200" /> | <img src="assets/screens/analyzing_demo.JPG" width="200" /> | <img src="assets/screens/scan_results_demo.JPG" width="200" /> | <img src="assets/screens/matching_allergens_screen.JPG" width="200" />
+| <img src="assets/screens/home_screen_demo.JPG" width="200" /> | <img src="assets/screens/manage_allergies_screen_demo.JPG" width="200" /> | <img src="assets/screens/capture_image_demo.JPG" width="200" /> | <img src="assets/screens/crop_image_demo.JPG" width="200" /> | <img src="assets/screens/processing_demo.JPG" width="200" /> | <img src="assets/screens/analyzing_demo.JPG" width="200" /> | <img src="assets/screens/scan_results_demo.JPG" width="200" /> | <img src="assets/screens/matching_allergens_screen_demo.JPG" width="200" />
 
 
 ## Installation
