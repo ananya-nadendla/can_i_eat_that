@@ -13,15 +13,14 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 Here are some screenshots demonstrating different features of the app in order of how it's used:
 
-- **Home Screen Demo:** ![Home Screen Demo](assets/screens/home_screen_demo.JPG)
-- **Manage Allergies Screen:** ![Manage Allergies Screen](assets/screens/manage_allergies_screen.JPG)
-- **Capture Image Demo:** ![Capture Image Demo](assets/screens/capture_image_demo.JPG)
-- **Crop Image Demo:** ![Crop Image Demo](assets/screens/crop_image_demo.JPG)
-- **Processing Demo:** ![Processing Demo](assets/screens/processing_demo.JPG)
-- **Analyzing Demo:** ![Analyzing Demo](assets/screens/analyzing_demo.JPG)
-- **Scan Results Demo:** ![Scan Results Demo](assets/screens/scan_results_demo.JPG)
-- **Matching Allergens Screen:** ![Matching Allergens Screen](assets/screens/matching_allergens_screen.JPG)
-
+- **Home Screen Demo:** <img src="assets/screens/home_screen_demo.JPG" width="200" />
+- **Manage Allergies Screen:** <img src="assets/screens/manage_allergies_screen.JPG" width="200" />
+- **Capture Image Demo:** <img src="assets/screens/capture_image_demo.JPG" width="200" />
+- **Crop Image Demo:** <img src="assets/screens/crop_image_demo.JPG" width="200" />
+- **Processing Demo:** <img src="assets/screens/processing_demo.JPG" width="200" />
+- **Analyzing Demo:** <img src="assets/screens/analyzing_demo.JPG" width="200" />
+- **Scan Results Demo:** <img src="assets/screens/scan_results_demo.JPG" width="200" />
+- **Matching Allergens Screen:** <img src="assets/screens/matching_allergens_screen.JPG" width="200" />
 
 
 ## Installation
