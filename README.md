@@ -11,12 +11,18 @@ A flutter app that checks whether or not a user with allergies can eat a food pr
 
 ## Demo
 
-Here are some screenshots demonstrating different features of the app in order of how it's used:
+Here are some screenshots demonstrating different features of the app in order of how it's used (left to right):
 
-| **Home Screen Demo** | **Manage Allergies Screen** | **Capture Image Demo** | **Crop Image Demo** | **Processing Demo** | **Analyzing Demo** | **Scan Results Demo** | **Matching Allergens Screen** |
-|----------------------|-----------------------------|------------------------|----------------------|---------------------|---------------------|------------------------|-------------------------------|
-| <img src="assets/screens/home_screen_demo.JPG" width="200" /> | <img src="assets/screens/manage_allergies_screen_demo.JPG" width="200" /> | <img src="assets/screens/capture_image_demo.JPG" width="200" /> | <img src="assets/screens/crop_image_demo.JPG" width="200" /> | <img src="assets/screens/processing_demo.JPG" width="200" /> | <img src="assets/screens/analyzing_demo.JPG" width="200" /> | <img src="assets/screens/scan_results_demo.JPG" width="200" /> | <img src="assets/screens/matching_allergens_screen_demo.JPG" width="200" />
-
+<div style="display: flex; flex-wrap: wrap; gap: 10px;">
+  <img src="assets/screens/home_screen_demo.JPG" width="200" style="flex: 1 1 24%;" />
+  <img src="assets/screens/manage_allergies_screen_demo.JPG" width="200" style="flex: 1 1 24%;" />
+  <img src="assets/screens/capture_image_demo.JPG" width="200" style="flex: 1 1 24%;" />
+  <img src="assets/screens/crop_image_demo.JPG" width="200" style="flex: 1 1 24%;" />
+  <img src="assets/screens/processing_demo.JPG" width="200" style="flex: 1 1 24%;" />
+  <img src="assets/screens/analyzing_demo.JPG" width="200" style="flex: 1 1 24%;" />
+  <img src="assets/screens/scan_results_demo.JPG" width="200" style="flex: 1 1 24%;" />
+  <img src="assets/screens/matching_allergens_screen_demo.JPG" width="200" style="flex: 1 1 24%;" />
+</div>
 
 ## Installation
 
