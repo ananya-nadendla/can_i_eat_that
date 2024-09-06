@@ -1,6 +1,6 @@
 ## Version Information
 
-### [0.12.7] - 2024-09-02/3
+### [0.12.8] - 2024-09-02/3/5
 #### MINOR UPDATE
 1) Renamed project from "Food Allergy Scanner" (food_allergy_scanner) to "Can I Eat That" (can_i_eat_that)
 
@@ -12,14 +12,15 @@
     - **Camera Screen**: Image deleted on camera capturing error, image retake, or image cancellation.
     - **Crop Screen**: Image deleted on cropping cancellation.
     - **Home Screen**: Image deleted on results "Photo is unclear," "Product is safe to eat," "Product contains allergens," and "No text recognized."
-5) Added Privacy Policy (for image deletion) in README
-6) README - Added app screenshots
+5) README - Added Privacy Policy (for image deletion + allergens stored to sharedPreferences)
+6) README - Added app screenshots 
 7) CHANGELOG: Formatted file for easier readability
+8) Home Screen: Removed phrase "or less of" from ingredients in normalizeIngredients() 
 
 #### TO DO:
-1) Remove phrase "or less of" from ingredients
-2) Neaten debugging print statements + replace with loggers
-3) README: Add app demo / screenshots
+1) Neaten debugging print statements + replace with loggers
+2) README: Add app demo / screenshots / gifs
+3) (IMPORTANT) Spacing between camera and camera button should be even (Small Phone)
 
 ### [0.11.3] - 2024-09-02
 #### BUG FIX

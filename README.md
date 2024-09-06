@@ -1,6 +1,7 @@
-# can_i_eat_that
+# Can I Eat That
 
-A flutter app that checks whether or not a user with allergies can eat a food product by scanning the ingredients label.
+🍎 A Flutter (Android) app dedicated to users with **food allergies**. 
+📱 Input your allergens, take a photo of an ingredient label, and let the app determine if you can eat that food product. Saves you the hassle of reading long and tiny text!
 
 ## Features
 
@@ -97,4 +98,8 @@ Privacy is important. The `can_i_eat_that` app takes your images of ingredient l
 
 - **Third-Party Sharing:** 
    - Our app uses the **Google ML Kit** for image processing and analysis. Images are sent to Google ML Kit APIs to perform necessary tasks such as text recognition.
-   - **Google’s Privacy Practices**: We do not control how Google handles the data. Please refer to Google’s Privacy Policy for details on how your data is managed and protected.
+   - **Google’s Privacy Practices**: We do not control how Google handles the data. Please refer to [Google’s Privacy Policy](https://policies.google.com/privacy) for details on how your data is managed and protected.
+
+### User Data Privacy
+
+- **Allergen Storage:** The *Can I Eat That* app saves the user’s allergens locally on the device. This data is used to personalize the allergen detection process and is not shared with any third parties. Users can manage or delete their stored allergens by using the **Manage Allergies** button on the home page, which leads to the allergies page.

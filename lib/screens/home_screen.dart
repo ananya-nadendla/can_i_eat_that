@@ -197,6 +197,7 @@ class _HomeScreenState extends State<HomeScreen> {
         .replaceAll(RegExp(r'\bMay\s+contain\b', caseSensitive: false), '')
         .replaceAll(RegExp(r'\bContains\b', caseSensitive: false), '')
         .replaceAll(RegExp(r'\bContain\b', caseSensitive: false), '')
+        .replaceAll(RegExp(r'\bOr\s+less\s+of\b', caseSensitive: false), '') 
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
 
