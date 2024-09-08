@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:can_i_eat_that/utils/utils.dart';
 
 class MerriamWebsterService {
   // Use dotenv to fetch API keys from .env file
@@ -27,18 +28,15 @@ class MerriamWebsterService {
             collegiateJsonResponse[0] is Map) {
           return true;
         } else {
-          print('No definitions found for "$word" in collegiate dictionary.');
+          LoggerUtil.logger.d('No definitions found for "$word" in collegiate dictionary.');
         }
       } else if (collegiateResponse.statusCode == 403) {
-        print(
-            'Invalid collegiate API key or not subscribed for this reference.');
+        LoggerUtil.logger.e('Invalid collegiate API key or not subscribed for this reference.');
       } else {
-        print(
-            'Failed to fetch definition for "$word" from collegiate dictionary. Status code: ${collegiateResponse.statusCode}');
+        LoggerUtil.logger.e('Failed to fetch definition for "$word" from collegiate dictionary. Status code: ${collegiateResponse.statusCode}');
       }
     } catch (e) {
-      print(
-          'Error fetching definition for "$word" from collegiate dictionary: $e');
+      LoggerUtil.logger.e('Error fetching definition for "$word" from collegiate dictionary: $e');
     }
 
     // If the word is not found in the collegiate dictionary, check the medical dictionary
@@ -57,17 +55,15 @@ class MerriamWebsterService {
         if (medicalJsonResponse.isNotEmpty && medicalJsonResponse[0] is Map) {
           return true;
         } else {
-          print('No definitions found for "$word" in medical dictionary.');
+          LoggerUtil.logger.d('No definitions found for "$word" in medical dictionary.');
         }
       } else if (medicalResponse.statusCode == 403) {
-        print('Invalid medical API key or not subscribed for this reference.');
+        LoggerUtil.logger.e('Invalid medical API key or not subscribed for this reference.');
       } else {
-        print(
-            'Failed to fetch definition for "$word" from medical dictionary. Status code: ${medicalResponse.statusCode}');
+        LoggerUtil.logger.e('Failed to fetch definition for "$word" from medical dictionary. Status code: ${medicalResponse.statusCode}');
       }
     } catch (e) {
-      print(
-          'Error fetching definition for "$word" from medical dictionary: $e');
+      LoggerUtil.logger.e('Error fetching definition for "$word" from medical dictionary: $e');
     }
 
     return false;

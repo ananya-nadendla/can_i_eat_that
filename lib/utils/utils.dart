@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+
 
 // Capitalizes the first letter of each word in a given string.
 String capitalizeFirstLetter(String text) {
@@ -42,6 +44,20 @@ Future<void> showConfirmationDialog(
           child: const Text('Clear All'),
         ),
       ],
+    ),
+  );
+}
+
+
+//Logger for debuggging purposes
+class LoggerUtil {
+  static final Logger logger = Logger(
+    printer: PrettyPrinter(
+      methodCount: 1, // Number of stacktrace methods to show
+      errorMethodCount: 8, // Number of stacktrace methods to show on error
+      lineLength: 120, // Width of the log output
+      colors: true, // Colorful log messages
+      printEmojis: true, // Print emojis for log levels
     ),
   );
 }

@@ -3,6 +3,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:can_i_eat_that/screens/home_screen.dart';
+import 'package:can_i_eat_that/utils/utils.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({Key? key}) : super(key: key);
@@ -50,7 +51,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
       await _controller!.initialize(); // Initialize the camera controller
     } catch (e) {
-      print('Error initializing camera: $e'); // Handle and log any errors during initialization
+      LoggerUtil.logger.e('Error initializing camera: $e'); // Handle and log any errors during initialization
     }
   }
 
@@ -98,11 +99,12 @@ class _CameraScreenState extends State<CameraScreen> {
       try {
         await _initializeControllerFuture;  // Wait for camera initialization to complete
         final image = await _controller!.takePicture(); // Capture the image
+        LoggerUtil.logger.d('Photo captured!');
         setState(() {
           _capturedImage = File(image.path); // Store the captured image
         });
       } catch (e) {
-        print('Error capturing image: $e'); // Handle and log any errors during image capture
+        LoggerUtil.logger.e('Error capturing photo: $e'); // Handle and log any errors during image capture
         _resetCamera(); // Ensure the image file is deleted on error
       }
     }
@@ -113,9 +115,9 @@ class _CameraScreenState extends State<CameraScreen> {
     if (_capturedImage != null) {
       try {
         await _capturedImage!.delete(); // Delete the image file
-        print('Photo deleted.');
+        LoggerUtil.logger.d('Photo deleted.');
       } catch (e) {
-        print('Error deleting image: $e'); // Handle and log any errors during image deletion
+        LoggerUtil.logger.e('Error deleting photo: $e'); // Handle and log any errors during image deletion
       }
       setState(() {
         _capturedImage = null;

@@ -1,6 +1,6 @@
 ## Version Information
 
-### [0.12.8] - 2024-09-02/3/5
+### [0.12.9] - 2024-09-02/3/5/7
 #### MINOR UPDATE
 1) Renamed project from "Food Allergy Scanner" (food_allergy_scanner) to "Can I Eat That" (can_i_eat_that)
 
@@ -16,11 +16,11 @@
 6) README - Added app screenshots 
 7) CHANGELOG: Formatted file for easier readability
 8) Home Screen: Removed phrase "or less of" from ingredients in normalizeIngredients() 
+9) Debugging - replaced print statement with loggers
 
 #### TO DO:
-1) Neaten debugging print statements + replace with loggers
-2) README: Add app demo / screenshots / gifs
-3) (IMPORTANT) Spacing between camera and camera button should be even (Small Phone)
+1) README: Add app demo / screenshots / gifs
+2) (IMPORTANT) Spacing between camera and camera button should be even (Small Phone)
 
 ### [0.11.3] - 2024-09-02
 #### BUG FIX

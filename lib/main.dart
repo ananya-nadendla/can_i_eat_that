@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:can_i_eat_that/providers/allergy_provider.dart';
 import 'package:can_i_eat_that/screens/home_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:can_i_eat_that/utils/utils.dart';
 
 void main() async {
   WidgetsFlutterBinding
@@ -12,10 +13,9 @@ void main() async {
   try {
     await dotenv.load(
         fileName: ".env"); // Load environment variables from the .env file
-    print('Environment variables loaded successfully.');
+    LoggerUtil.logger.d('Environment variables loaded successfully.');
   } catch (e) {
-    print(
-        'Error loading environment variables: $e'); // Environment variable loading failed
+    LoggerUtil.logger.e('Error loading environment variables: $e'); // Environment variable loading failed
   }
   runApp(const MyApp()); // Run the main application widget
 }

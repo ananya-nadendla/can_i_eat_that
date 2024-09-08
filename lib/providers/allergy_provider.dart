@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:can_i_eat_that/utils/utils.dart';
 
 class AllergyProvider extends ChangeNotifier {
   // List to store user-selected allergies
@@ -120,14 +121,14 @@ class AllergyProvider extends ChangeNotifier {
   Future<void> _saveAllergies() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('allergies', _allergies);
-    print('Saved allergies (${_allergies.length}): $_allergies'); // Debugging line
+    LoggerUtil.logger.d('Saved allergies (${_allergies.length}): $_allergies'); // Debugging line
   }
 
   // Loads the list of allergies from SharedPreferences
   Future<void> _loadAllergies() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _allergies = prefs.getStringList('allergies') ?? [];
-    print('Loaded allergies (${_allergies.length}): $_allergies');
+    LoggerUtil.logger.d('Loaded allergies (${_allergies.length}): $_allergies');
     notifyListeners();
   }
 }

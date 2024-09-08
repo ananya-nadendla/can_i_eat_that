@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:crop_your_image/crop_your_image.dart';
+import 'package:can_i_eat_that/utils/utils.dart';
 
 class CropScreen extends StatefulWidget {
   final File imageFile;
@@ -39,6 +40,8 @@ class _CropScreenState extends State<CropScreen> {
       _isCropping = true; // Set cropping flag to true
     });
     _cropController.crop(); // Trigger the crop method
+    LoggerUtil.logger.d('Cropper triggered!');
+    
   }
 
   @override

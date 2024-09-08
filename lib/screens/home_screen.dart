@@ -101,7 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
     List<String> toValidate = [];
 
     //Debugging
-    print('validateIngredients() INGREDIENTS: $ingredients');
+    LoggerUtil.logger.d('Normalized Ingredients: \n$ingredients');
 
     //Process & add words to validation list
     for (String word in allWords) {
@@ -111,8 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (cleanedWord.isNotEmpty) {
         // Special Case: Digits
         if (RegExp(r'\d').hasMatch(cleanedWord)) {
-          print(
-              'Skipping word with digits: $cleanedWord'); // e.g., "B3" in Vitamin B3
+          LoggerUtil.logger.d('Process: Word Validation\nSkipping validation for words with DIGITS: $cleanedWord'); // e.g., "B3" in Vitamin B3
           continue;
         }
 
@@ -120,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
         if (predefinedValidWords.contains(cleanedWord.toLowerCase())) {
           validWordsCount++; //word marked as valid
           checkedWordsCount++; //word marked as checked
-          print('Skipping - PREDEFINED VALID ($validWordsCount): $cleanedWord');
+          LoggerUtil.logger.d('Process: Word Validation\nSkipping validation for PREDEFINED VALID WORDS ($validWordsCount): $cleanedWord');
           progressStream
               .add(checkedWordsCount); // Update progress for each checked word
           continue;
@@ -139,18 +138,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
       List<Future<void>> validationFutures = batch.map((word) async {
         checkedWordsCount++;
-        print('Validating word ($checkedWordsCount): $word');
+        LoggerUtil.logger.d('Process: Word Validation\nValidating word ($checkedWordsCount): $word');
         bool isValid =
             await merriamWebsterService.isValidWord(word.toLowerCase());
 
         if (isValid) {
           //Ingredient is valid
           validWordsCount++;
-          print("WORD VALID!! ($validWordsCount): $word");
+          LoggerUtil.logger.d("Process: Word Validation\nRESULT: Word Valid! ($validWordsCount): $word");
         } else {
           isValidIngredients = false;
           //Ingredient is invalid
-          print('WORD INVALID!! - Word not found in dictionary: [$word]');
+          LoggerUtil.logger.d('Process: Word Valiation\nRESULT: Word Invalid! - Word not found in dictionary: [$word]');
 
           // Mark the entire ingredient as invalid
           String? ingredient;
@@ -175,10 +174,10 @@ class _HomeScreenState extends State<HomeScreen> {
       await Future.wait(validationFutures);
     }
 
-    double validityPercentage = (validWordsCount / totalCount) *
-        100; //Threshold used to mark image as too blurry / too many typos
-    print('Valid Count: $validWordsCount, Total Count: $totalCount');
-    print('Validity Percentage: $validityPercentage%');
+    //Threshold used to mark image as too blurry / too many typos
+    double validityPercentage = (validWordsCount / totalCount) * 100; 
+    LoggerUtil.logger.d('Process: Word Validation\nValid Word Count: $validWordsCount, Total Word Count: $totalCount\nValidity Percentage: $validityPercentage%');
+
 
     return {
       'isValidIngredients': isValidIngredients,
@@ -262,7 +261,7 @@ class _HomeScreenState extends State<HomeScreen> {
     };
   }
 
-  //Finds matches between user's allergens and scanned ingredients
+  //Matching Algorithm - Finds matches between user's allergens and scanned ingredients
   Map<String, dynamic> findMatches(List<String> ingredients,
       List<String> allergies, List<String> invalidIngredients) {
     List<String> matchingAllergens =
@@ -271,8 +270,6 @@ class _HomeScreenState extends State<HomeScreen> {
     bool isSafe = true; //Marks if food product is safe
 
     if (ingredients.isNotEmpty) {
-      print(
-          'scanProduct()/findMatches() INGREDIENTS: $ingredients'); //Debugging
 
       for (String ingredient in ingredients) {
         String cleanedIngredient = ingredient.trim();
@@ -293,18 +290,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 caseSensitive: false);
 
             //Debugging
-            print(
-                '[Checking: Singular]: $singular, [Plural: $plural] --> In [ingredient: $cleanedIngredient]');
+            LoggerUtil.logger.d('Process: Matching\nComparing Allergen: [Singular: $singular], [Plural: $plural] --> Against [Ingredient: $cleanedIngredient]');
 
             //Check for matches
             if (regexSingular.hasMatch(cleanedIngredient) ||
                 regexPlural.hasMatch(cleanedIngredient)) {
-              print(
-                  'MATCH FOUND: "$allergy" in ingredient: "$cleanedIngredient"');
-              matchesAllergy = true;
-              isSafe = false; // Set isSafe to false if any match is found
-              matchingAllergens.add(allergy); //add allergy to list
-              break; // Stop checking other allergies if a match is found
+                  LoggerUtil.logger.d('Process: Matching\nMATCH FOUND: Allergen "$allergy" in Ingredient: "$cleanedIngredient"');
+                  matchesAllergy = true;
+                  isSafe = false; // Set isSafe to false if any match is found
+                  matchingAllergens.add(allergy); //add allergy to list
+                  break; // Stop checking other allergies if a match is found
             }
           }
 
@@ -376,7 +371,7 @@ class _HomeScreenState extends State<HomeScreen> {
         await textRecognizer.processImage(inputImage);
 
     //Debugging - print raw ingredients
-    print('Scanned Ingredients: ${recognizedText.text}');
+    LoggerUtil.logger.d('Scanned Text-recognition (Raw) :\n\n${recognizedText.text}');
 
     Navigator.of(context).pop();
 
@@ -432,7 +427,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (validityPercentage < 90) {
       //Most ingredients were not valid - show AlertDialog
-      print('Invalid ingredients scanned');
+      LoggerUtil.logger.d('Scan Result: Too many invalid (not in dictionary) ingredients identified!');
       textRecognizer.close();
       showDialog(
         context: context,
@@ -478,15 +473,19 @@ class _HomeScreenState extends State<HomeScreen> {
     List<String> safeIngredients = result['safeIngredients'];
     bool isSafe = result['isSafe'];
 
-    //Debugging - array contents
-    print('Matching Allergens: ${matchingAllergens.length}');
-    print(matchingAllergens);
+    // Debugging - array contents
+    LoggerUtil.logger.d(
+      'Matching Allergens:\n'
+      '  [Count: ${matchingAllergens.length}]\n'
+      '  $matchingAllergens\n\n'
+      'Invalid Allergens:\n'
+      '  [Count: ${invalidIngredients.length}]\n'
+      '  $invalidIngredients\n\n'
+      'Safe Ingredients:\n'
+      '  [Count: ${safeIngredients.length}]\n'
+      '  $safeIngredients'
+    );
 
-    print('Invalid Allergens: ${invalidIngredients.length}');
-    print(invalidIngredients);
-
-    print('Safe Ingredients: ${safeIngredients.length}');
-    print(safeIngredients);
 
     //Show results of scan
     textRecognizer.close();
